@@ -1,9 +1,6 @@
 <template>
-  <div id="app">
-  	<router-view></router-view>
-  </div>
+  <div>toolbar{{ $route.params.id }}</div>
 </template>
-
 <script>
 export default {
 }

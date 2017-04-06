@@ -1,20 +1,14 @@
 <template>
-  <ul>
-    <li v-for="p in products">
-      {{ p.title }} - {{ p.price | currency }}
-      <br>
-      <button
-        :disabled="!p.inventory"
-        @click="addToCart(p)">
-        Add to cart
-      </button>
-    </li>
-  </ul>
+  <ToolBar></ToolBar>
 </template>
-
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import ToolBar from './ToolBar.vue'
+
 export default {
+  components: {
+    ToolBar
+  },
   computed: mapGetters({
     products: 'allProducts'
   }),
