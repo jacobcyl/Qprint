@@ -5,20 +5,120 @@ const _templates = [
   {
     'id': '1',
     'title': 'The table of bank',
-    'pages': {
-      order: 1,
-      name: 'page-1',
-      components: [
-        {
-          id: 1,
-          width: '100mm',
-          heiht: '30mm',
-          left: '100mm',
-          top: '100mm',
-          'font-size': '14px'
-        }
-      ]
-    }
+    'pages': [
+      {
+        id: 1,
+        order: 1,
+        name: 'page-1',
+        components: [
+          {
+            id: 1,
+            width: '100mm',
+            heiht: '30mm',
+            left: '100mm',
+            top: '100mm',
+            'font-size': '14px',
+            text: ''
+          }
+        ]
+      },
+      {
+        id: 2,
+        order: 2,
+        name: 'page-1',
+        components: [
+          {
+            id: 1,
+            width: '100mm',
+            heiht: '30mm',
+            left: '100mm',
+            top: '100mm',
+            'font-size': '14px',
+            text: ''
+          }
+        ]
+      },
+      {
+        id: 3,
+        order: 3,
+        name: 'page-1',
+        components: [
+          {
+            id: 1,
+            width: '100mm',
+            heiht: '30mm',
+            left: '100mm',
+            top: '100mm',
+            'font-size': '14px',
+            text: ''
+          }
+        ]
+      },
+      {
+        id: 3,
+        order: 3,
+        name: 'page-1',
+        components: [
+          {
+            id: 1,
+            width: '100mm',
+            heiht: '30mm',
+            left: '100mm',
+            top: '100mm',
+            'font-size': '14px',
+            text: ''
+          }
+        ]
+      },
+      {
+        id: 3,
+        order: 3,
+        name: 'page-1',
+        components: [
+          {
+            id: 1,
+            width: '100mm',
+            heiht: '30mm',
+            left: '100mm',
+            top: '100mm',
+            'font-size': '14px',
+            text: ''
+          }
+        ]
+      },
+      {
+        id: 3,
+        order: 3,
+        name: 'page-1',
+        components: [
+          {
+            id: 1,
+            width: '100mm',
+            heiht: '30mm',
+            left: '100mm',
+            top: '100mm',
+            'font-size': '14px',
+            text: ''
+          }
+        ]
+      },
+      {
+        id: 3,
+        order: 3,
+        name: 'page-1',
+        components: [
+          {
+            id: 1,
+            width: '100mm',
+            heiht: '30mm',
+            left: '100mm',
+            top: '100mm',
+            'font-size': '14px',
+            text: ''
+          }
+        ]
+      }
+    ]
   },
   {'id': '2', 'title': 'H&M T-Shirt White', 'pages': []},
   {'id': '3', 'title': '银行贷款资料', 'pages': []},

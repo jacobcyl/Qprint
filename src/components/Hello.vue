@@ -1,53 +1,48 @@
-<template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank">Forum</a></li>
-      <li><a href="https://gitter.im/vuejs/vue" target="_blank">Gitter Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank">Twitter</a></li>
-      <br>
-      <li><a href="http://vuejs-templates.github.io/webpack/" target="_blank">Docs for This Template</a></li>
-    </ul>
-    <h2>Ecosystem</h2>
-    <ul>
-      <li><a href="http://router.vuejs.org/" target="_blank">vue-router</a></li>
-      <li><a href="http://vuex.vuejs.org/" target="_blank">vuex</a></li>
-      <li><a href="http://vue-loader.vuejs.org/" target="_blank">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank">awesome-vue</a></li>
-    </ul>
-  </div>
-</template>
-
-<script>
-export default {
-  name: 'hello',
-  data () {
-    return {
-      msg: 'Welcome to Your Vue.js App'
-    }
+<style>
+  .tab-container, .tab-container > .ivu-tabs-card{
+    height: 100%;
   }
-}
-</script>
+  .tab-container > .ivu-tabs-card > .ivu-tabs-content {
+      height: 100%;
+      margin-top: -16px;
+  }
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h1, h2 {
-  font-weight: normal;
-}
+  .tab-container > .ivu-tabs-card > .ivu-tabs-content > .ivu-tabs-tabpane {
+      background: #fff;
+      padding: 16px;
+  }
 
-ul {
-  list-style-type: none;
-  padding: 0;
-}
+  .tab-container > .ivu-tabs.ivu-tabs-card > .ivu-tabs-bar .ivu-tabs-tab {
+      border-color: transparent;
+  }
 
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-
-a {
-  color: #42b983;
-}
+  .tab-container > .ivu-tabs-card > .ivu-tabs-bar .ivu-tabs-tab-active {
+      border-color: #fff;
+  }
+  .left-panel {
+    position: fixed;
+    left: 0;
+    top: 38px;
+    box-sizing: border-box;
+    bottom: 0px;
+    width: 280px;
+    z-index: 4;
+    border-right: 1px solid #aaaaaa;
+    transition: all 0.15s ease-in-out;
+  }
 </style>
+<template>
+    <div class="left-panel">
+        <div class="tab-container" style="background: #e3e8ee;padding:16px;">
+            <Tabs type="card">
+                <Tab-pane label="标签一">标签一的内容</Tab-pane>
+                <Tab-pane label="标签二">标签二的内容</Tab-pane>
+                <Tab-pane label="标签三">标签三的内容</Tab-pane>
+            </Tabs>
+        </div>
+      </div>
+</template>
+<script>
+    export default {
+    }
+</script>
