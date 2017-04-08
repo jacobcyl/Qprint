@@ -58,11 +58,12 @@
             </div>
         </Menu>
         <div class="layout-content">
-          <Row :gutter="16">
+          <Row :gutter="16" v-if="templates.length > 0">
               <Col :xs="24" :sm="12" :md="8" :lg="6" v-for="(template, index) in templates" :key="template.id">
                 <print-template :title="template.title" :tpl-id="template.id" />
               </Col>
           </Row>
+          <Spin size="large" fix v-if="loading"></Spin>
         </div>
         <div class="layout-copy">
             2017 &copy; HanLing
@@ -77,17 +78,16 @@
     components: {
       PrintTemplate
     },
-    computed: mapGetters({
-      templates: 'allTemplates'
-    }),
-    methods: {
-      ...mapActions([
-        'addToCart'
-      ]),
-      ...mapActions([
-        'getAllTemplates'
-      ])
+    computed: {
+      ...mapGetters({
+        loading: 'workspace/loading',
+        error: 'workspace/error',
+        templates: 'workspace/templates'
+      })
     },
+    methods: mapActions({
+      'getAllTemplates': 'workspace/getAllTemplates'
+    }),
     created () {
       this.getAllTemplates()
     }

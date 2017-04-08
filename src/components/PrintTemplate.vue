@@ -1,7 +1,7 @@
 <template>
   <Card style="margin-bottom: 16px;">
     <p slot="title">{{ title }}</p>
-    <router-link slot="extra" :to="{ name: 'editTemplate', params: { id: tplId }}">
+    <router-link slot="extra" :to="{ name: 'template', params: { id: tplId }}">
       <Icon type="ios-compose"></Icon>
       编辑
     </router-link>
@@ -21,10 +21,7 @@ export default {
       required: true
     }
   },
-  data () {
-    return {
-      msg: 'Welcome to Your Vue.js App'
-    }
+  created () {
   }
 }
 </script>

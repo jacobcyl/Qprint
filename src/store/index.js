@@ -2,9 +2,8 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 // import * as actions from './actions'
 // import * as getters from './getters'
-import cart from './modules/cart'
-import products from './modules/products'
-import templates from './modules/templates'
+import workspace from './modules/workspace'
+import template from './modules/template'
 
 import createLogger from 'vuex/dist/logger'
 
@@ -19,9 +18,8 @@ const store = new Vuex.Store({
   // actions,
   // getters,
   modules: {
-    cart,
-    products,
-    templates
+    workspace,
+    template
   },
   plugins
 })

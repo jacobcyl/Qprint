@@ -1,8 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Workspace from '@/components/Workspace'
-import Editor from '@/components/Editor'
-import Hello from '@/components/Hello'
+import Template from '@/components/Template'
 
 Vue.use(Router)
 
@@ -24,13 +23,8 @@ export default new Router({
     },
     {
       path: '/workspace/template/:id',
-      name: 'editTemplate',
-      component: Editor
-    },
-    {
-      path: '/hello',
-      name: 'hello',
-      component: Hello
+      name: 'template',
+      component: Template
     }
   ]
 })

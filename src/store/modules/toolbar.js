@@ -1,4 +1,3 @@
-import template from '../../api/template'
 import * as types from '../mutation-types'
 
 // initial state
