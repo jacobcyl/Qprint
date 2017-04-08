@@ -26,8 +26,6 @@
     left: 280px;
     right: 280px;
     background: #f0f0f2;
-    touch-action: none;
-    overflow: hidden;
   }
   .right-panel {
     right: 0;
@@ -40,6 +38,9 @@
     transform-origin: 0 0;
     margin: 0 auto;
   }
+  .canvas {
+    transform-origin: center 0;
+  }
   .preview-page-container {
     width: 180px;
     height: 180px;
@@ -47,10 +48,12 @@
     margin-bottom: 16px;
   }
   .page-container {
+    margin: auto;
     position: relative;
     z-index: -100;
     width: 10000px;
     height: 9999px;
+    padding: 50px;
   }
   .tab-container{
     background: #e3e8ee;
@@ -83,9 +86,11 @@
           </Tabs>
         </div>
       </div>
-      <div class="panel middle-panel">
-        <div class="page-container"></div>
-      </div>
+      <VuePerfectScrollbar ref="screen" class="panel middle-panel" v-once :settings="settings" @ps-scroll-y="scrollHanle">
+        <div ref="canvas" class="page-container">
+          <Page class="canvas" :page="pages[currPage]" :style="{ transform: 'scale(' + canvasScale + ')'}"></Page>
+        </div>
+      </VuePerfectScrollbar>
       <!-- right panel -->
       <div class="panel right-panel">
       </div>
@@ -96,6 +101,7 @@
 import ToolBar from './ToolBar.vue'
 import Page from './Page.vue'
 import draggable from 'vuedraggable'
+import VuePerfectScrollbar from 'vue-perfect-scrollbar'
 import '@/assets/css/styles.css'
 
 export default {
@@ -103,17 +109,17 @@ export default {
   data () {
     return {
       pages: this.template.pages,
-      list: [
-        1,
-        2,
-        3,
-        4
-      ],
+      currPage: 0,
       pageWidth: 0,
       pageHeight: 0,
       previewPageWidth: 100,
       previewPageHeight: 120,
-      previewScale: 0.1
+      previewScale: 0.1, // 预览缩放
+      canvasScale: 0.55,
+      settings: {
+        maxScrollbarLength: 80,
+        wheelSpeed: 0.1
+      }
     }
   },
   props: {
@@ -123,11 +129,15 @@ export default {
     }
   },
   methods: {
+    scrollHanle (evt) {
+      console.log(evt)
+    }
   },
   components: {
     ToolBar,
     Page,
-    draggable
+    draggable,
+    VuePerfectScrollbar
   },
   mounted () {
     if (this.$refs.page && this.$refs.page.length > 0) {
@@ -139,6 +149,9 @@ export default {
         this.previewPageHeight / this.pageHeight
       )
     }
+
+    // scroll to center horizontal
+    this.$refs.screen.$el.scrollLeft = (this.$refs.canvas.clientWidth - this.$refs.screen.$el.clientWidth) / 2
   }
 }
 </script>
