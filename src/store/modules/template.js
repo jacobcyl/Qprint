@@ -5,14 +5,16 @@ import * as types from '../mutation-types'
 const state = {
   loading: false,
   data: null,
-  error: false
+  error: false,
+  canvasWidth: 200
 }
 
 // getters
 const getters = {
   data: state => state.data,
   loading: state => state.loading,
-  error: state => state.error
+  error: state => state.error,
+  canvasWidth: state => state.canvasWidth
 }
 
 // actions
