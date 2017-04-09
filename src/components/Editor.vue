@@ -39,7 +39,8 @@
     margin: 0 auto;
   }
   .canvas {
-    transform-origin: center 0;
+    margin: 0 auto;
+    transform-origin: 0 0;
   }
   .preview-page-container {
     width: 180px;
@@ -78,7 +79,6 @@
                 <draggable v-model="pages" :options="{group:'page', animation: 150}" @start="drag=true" @end="drag=false">
                   <transition-group>
                      <div class="preview-page-container" :style="{ width: previewPageWidth + 'px', height: previewPageHeight + 'px' }" v-for="page in pages" :key="page.id">
-                      <span>{{ counter }}</span>
                       <Page ref="page" class="preview" :page="page" :style="{ transform: 'scale(' + previewScale + ')'}"></Page>
                     </div>
                   </transition-group>
@@ -86,24 +86,23 @@
               </div>
             </Tab-pane>
             <Tab-pane label="资料" name="name2">
-              <div tabindex="-1" ref="focusableDiv"></div>
-              <a @click.prevent="getEle">{{ canvasWidth }}</a>
             </Tab-pane>
           </Tabs>
         </div>
       </div>
       <!-- middle panel -->
-      <!-- <VuePerfectScrollbar v-model="canvasWidth" ref="screen" class="panel middle-panel" v-once :settings="settings" @ps-scroll-y="scrollHanle">
+      <VuePerfectScrollbar ref="screen" class="panel middle-panel" :settings="settings" @ps-scroll-y="scrollHanle">
+        <Ruler :screenWidth="screenWidth" :screenHeight="screenHeight" :scale="canvasScale">
+        </Ruler>
         <div ref="canvas" class="page-container">
-          <div class="canvas-container" :style="{ width: canvasWidth + 'px', height: canvasHeight + 'px' }">
+          <div class="canvas-container" v-bind:style="{ width: canvasWidth + 'px', height: canvasHeight + 'px' }">
             <Page class="canvas" :page="pages[currPage]" :style="{ transform: 'scale(' + canvasScale + ')'}"></Page>
           </div>
         </div>
-        <span v-model="counter" style="position: absolute; width: 720px; left: 4640px; bottom: 0px;">{{ counter }}</span>
-      </VuePerfectScrollbar> -->
+      </VuePerfectScrollbar>
       <!-- right panel -->
       <div class="panel right-panel">
-          <button style="margin: 0 auto" v-on:click="counter += 1">{{ counter }}</button>
+        <button v-on:click="counter += 1">{{ counter }}增加 1</button>
       </div>
     </div>
   </div>
@@ -124,16 +123,13 @@ export default {
       counter: 0,
       pages: this.template.pages,
       currPage: 0,
-      screenWidth: window.innerWidth,
-      screenHeight: window.innerHeight,
+      screenWidth: 0,
+      screenHeight: 0,
       pageWidth: 0,
       pageHeight: 0,
       previewPageWidth: 100,
       previewPageHeight: 120,
       previewScale: 0.1, // 预览缩放
-      canvasScale: 0.55,
-      canvasWidth: (window.innerHeight - 100),
-      canvasHeight: window.innerHeight - 100,
       settings: {
         maxScrollbarLength: 80,
         wheelSpeed: 0.1
@@ -147,24 +143,28 @@ export default {
     }
   },
   computed: {
-    canvasWidth: function () {
-      return this.counter
+    canvasHeight: function () {
+      const {innerHeight} = window
+      return (innerHeight - 100)
     },
-    classObject: function () {
-      console.log(this.pageHeight)
-      const w = this.pageHeight === 0 ? 0 : this.pageWidth * this.canvasHeight / this.pageHeight
-      return {
-        width: w,
-        height: this.canvasHeight
-      }
+    canvasWidth: function () {
+      return this.pageHeight === 0 ? 0 : this.canvasHeight * this.pageWidth / this.pageHeight
+    },
+    canvasScale: function () {
+      if (this.page === 0) return 0.55
+      return this.canvasWidth / this.pageWidth
     }
   },
   methods: {
     scrollHanle (evt) {
-      console.log(evt)
+      // console.log(evt)
     },
     vueRulerChanged (data) {
       console.log(data)
+    },
+    handleResize (evt) {
+      this.screenWidth = this.$refs.screen.$el.clientWidth
+      this.screenHeight = this.$refs.screen.$el.clientHeight
     }
   },
   components: {
@@ -179,15 +179,17 @@ export default {
       this.pageWidth = this.$refs.page[0].$el.clientWidth
       this.pageHeight = this.$refs.page[0].$el.clientHeight
 
-      this.canvasWidth = this.pageWidth * this.canvasHeight / this.pageHeight
-      this.canvasScale = this.canvasWidth / this.pageWidth
-
       this.previewPageWidth = this.pageWidth * this.previewPageHeight / this.pageHeight
       this.previewScale = this.previewPageWidth / this.pageWidth
     }
     // scroll to center horizontal
-    console.log(this.$refs)
-    // this.$refs.screen.$el.scrollLeft = (this.$refs.canvas.clientWidth - this.$refs.screen.$el.clientWidth) / 2
+    this.$refs.screen.$el.scrollLeft = (this.$refs.canvas.clientWidth - this.$refs.screen.$el.clientWidth) / 2
+    this.screenWidth = this.$refs.screen.$el.clientWidth
+    this.screenHeight = this.$refs.screen.$el.clientHeight
+    window.addEventListener('resize', this.handleResize)
+  },
+  beforeDestroy () {
+    window.removeEventListener('resize', this.handleResize)
   }
 }
 </script>
