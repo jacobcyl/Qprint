@@ -17,7 +17,8 @@ const _templates = [
             heiht: '30mm',
             left: '100mm',
             top: '100mm',
-            'font-size': '14px',
+            fontSize: '14px',
+            widgetId: 'widget1',
             text: ''
           }
         ]
@@ -33,7 +34,8 @@ const _templates = [
             heiht: '30mm',
             left: '100mm',
             top: '100mm',
-            'font-size': '14px',
+            fontSize: '14px',
+            widgetId: 'widget1',
             text: ''
           }
         ]
@@ -49,7 +51,8 @@ const _templates = [
             heiht: '30mm',
             left: '100mm',
             top: '100mm',
-            'font-size': '14px',
+            fontSize: '14px',
+            widgetId: 'widget1',
             text: ''
           }
         ]
@@ -65,7 +68,8 @@ const _templates = [
             heiht: '30mm',
             left: '100mm',
             top: '100mm',
-            'font-size': '14px',
+            fontSize: '14px',
+            widgetId: 'widget1',
             text: ''
           }
         ]
@@ -81,7 +85,8 @@ const _templates = [
             heiht: '30mm',
             left: '100mm',
             top: '100mm',
-            'font-size': '14px',
+            fontSize: '14px',
+            widgetId: 'widget1',
             text: ''
           }
         ]
@@ -97,7 +102,8 @@ const _templates = [
             heiht: '30mm',
             left: '100mm',
             top: '100mm',
-            'font-size': '14px',
+            fontSize: '14px',
+            widgetId: 'widget1',
             text: ''
           }
         ]
@@ -113,7 +119,8 @@ const _templates = [
             heiht: '30mm',
             left: '100mm',
             top: '100mm',
-            'font-size': '14px',
+            fontSize: '14px',
+            widgetId: 'widget1',
             text: ''
           }
         ]

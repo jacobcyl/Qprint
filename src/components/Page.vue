@@ -5,6 +5,7 @@
     margin: 0 auto;
     margin-bottom: 0.5cm;
     box-shadow: 0 0 0.5cm rgba(0,0,0,0.5);
+    position: relative;
   }
   .page[size="A4"] {
     width: 21cm;
@@ -15,18 +16,37 @@
   }
 </style>
 <template>
-  <div class="page" size="A4">
-    <div class="component" style="left: 100mm; top: 200mm; font-size: 80px;">aaa {{ page.id }}</div>
+  <div class="page" size="A4" v-droppable>
+    <template v-for="component in page.components">
+      <div class="component" :style="{left: component.left, top: component.top, 'font-size': component.fontSize}">
+        {{ widgetText(component.widgetId) }}
+      </div>
+    </template>
   </div>
 </template>
 
 <script>
-export default {
-  props: {
-    page: {
-      type: Object,
-      required: true
+  import Draggable from './Draggable.vue'
+  export default {
+    props: {
+      page: {
+        type: Object,
+        required: true
+      },
+      widgets: {
+        type: Array,
+        required: true
+      }
+    },
+    methods: {
+      widgetText: function (id) {
+        let widget = this.widgets.find(t => t.id === id)
+        if (widget !== undefined) return widget.text
+        else return 'undefined'
+      }
+    },
+    components: {
+      Draggable
     }
   }
-}
 </script>

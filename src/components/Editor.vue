@@ -54,7 +54,7 @@
     z-index: -100;
     width: 10000px;
     height: 9999px;
-    padding: 50px;
+    padding: 30px;
   }
   .canvas-container{
     margin: auto;
@@ -64,6 +64,26 @@
   .tab-container{
     background: #e3e8ee;
     padding:16px;
+  }
+
+  /**/
+  .ui-draggable {
+    background-color: #5bc0de;
+    display: inline-block;
+    text-align: center;
+    border-radius: 3px;
+    margin-right: 10px;
+    cursor:pointer;
+    padding: 6px 20px;
+    color: #fff;
+  }
+  .component{
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+  .hide{
+    transform:translateX(-9999px);
   }
 </style>
 <template>
@@ -78,8 +98,8 @@
               <div ref="content" class="content">
                 <draggable v-model="pages" :options="{group:'page', animation: 150}" @start="drag=true" @end="drag=false">
                   <transition-group>
-                     <div class="preview-page-container" :style="{ width: previewPageWidth + 'px', height: previewPageHeight + 'px' }" v-for="page in pages" :key="page.id">
-                      <Page ref="page" class="preview" :page="page" :style="{ transform: 'scale(' + previewScale + ')'}"></Page>
+                    <div class="preview-page-container" :style="{ width: previewPageWidth + 'px', height: previewPageHeight + 'px' }" v-for="page in pages" :key="page.id">
+                      <Page ref="page" class="preview" :page="page" :widgets="widgets" :style="{ transform: 'scale(' + previewScale + ')'}"></Page>
                     </div>
                   </transition-group>
                 </draggable>
@@ -96,13 +116,14 @@
         </Ruler>
         <div ref="canvas" class="page-container">
           <div class="canvas-container" v-bind:style="{ width: canvasWidth + 'px', height: canvasHeight + 'px' }">
-            <Page class="canvas" :page="pages[currPage]" :style="{ transform: 'scale(' + canvasScale + ')'}"></Page>
+            <Page class="canvas page" :page="pages[currPage]" :widgets="widgets" :style="{ transform: 'scale(' + canvasScale + ')'}">
+            </Page>
           </div>
         </div>
       </VuePerfectScrollbar>
       <!-- right panel -->
       <div class="panel right-panel">
-        <button v-on:click="counter += 1">{{ counter }}增加 1</button>
+        <div id='widget1' data-type="widget" class='ui-draggable' draggable='true' v-draggable="{droparea:dropArea, handleDrop:handleDrop}">测试</div>
       </div>
     </div>
   </div>
@@ -112,6 +133,7 @@
 import ToolBar from './ToolBar.vue'
 import Page from './Page.vue'
 import draggable from 'vuedraggable'
+import Draggable from './Draggable.vue'
 import VuePerfectScrollbar from 'vue-perfect-scrollbar'
 import Ruler from './Ruler'
 import '@/assets/css/styles.css'
@@ -133,7 +155,8 @@ export default {
       settings: {
         maxScrollbarLength: 80,
         wheelSpeed: 0.1
-      }
+      },
+      dropArea: 'page'
     }
   },
   props: {
@@ -145,7 +168,7 @@ export default {
   computed: {
     canvasHeight: function () {
       const {innerHeight} = window
-      return (innerHeight - 100)
+      return (innerHeight - 80)
     },
     canvasWidth: function () {
       return this.pageHeight === 0 ? 0 : this.canvasHeight * this.pageWidth / this.pageHeight
@@ -153,6 +176,14 @@ export default {
     canvasScale: function () {
       if (this.page === 0) return 0.55
       return this.canvasWidth / this.pageWidth
+    },
+    widgets: function () {
+      return [
+        {
+          id: 'widget1',
+          text: 'hahahah'
+        }
+      ]
     }
   },
   methods: {
@@ -165,6 +196,9 @@ export default {
     handleResize (evt) {
       this.screenWidth = this.$refs.screen.$el.clientWidth
       this.screenHeight = this.$refs.screen.$el.clientHeight
+    },
+    handleDrop (evt, data) {
+      console.log('dropped')
     }
   },
   components: {
@@ -172,7 +206,8 @@ export default {
     Page,
     draggable,
     VuePerfectScrollbar,
-    Ruler
+    Ruler,
+    Draggable
   },
   mounted () {
     if (this.$refs.page && this.$refs.page.length > 0) {

@@ -96,11 +96,11 @@
         this.drawHRuler()
       },
       drawVRuler: function () {
-        console.log('draw')
+        // console.log('draw')
         const shadow = null
         const {vctx, ratio} = this
         const {width, height} = this.vRulerSize
-        console.log(vctx)
+        // console.log(vctx)
         const start = 0
         const {
           fontColor, shadowColor, bgColor, fontScale, perWidth, scale, fgColor
@@ -152,11 +152,11 @@
         vctx.translate(0, start * ratio)
       },
       drawHRuler: function () {
-        console.log('draw')
+        // console.log('draw')
         const shadow = null
         const {hctx, ratio} = this
         const {width, height} = this.hRulerSize
-        console.log(hctx)
+        // console.log(hctx)
         const start = 0
         const {
           fontColor, shadowColor, bgColor, fontScale, perWidth, scale, fgColor
