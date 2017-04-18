@@ -50,7 +50,13 @@ Vue.directive('droppable', {
       // console.log('drop')
       console.log(e)
       e.preventDefault()
-      var dragInfo = JSON.parse(e.dataTransfer.getData('text/plain'))
+      var data = e.dataTransfer.getData('text/plain')
+
+      try {
+        var dragInfo = JSON.parse(data)
+      } catch (e) {
+        return
+      }
       if (dragInfo.dropArea && e.target.classList.value.split(' ').indexOf(dragInfo.dropArea) === -1) {
         return
       }
@@ -73,7 +79,16 @@ Vue.directive('droppable', {
         dragCopy.style.left = (e.offsetX - dragInfo.offsetX) + 'px'
         dragCopy.style.top = (e.offsetY - dragInfo.offsetY) + 'px'
         // copy a new object to the droppable area
-        e.target.appendChild(dragCopy)
+        // e.target.appendChild(dragCopy)
+        const el = {
+          id: dragCopy.id,
+          left: (e.offsetX - dragInfo.offsetX) + 'px',
+          top: (e.offsetY - dragInfo.offsetY) + 'px',
+          fontSize: '14px',
+          widgetId: dragInfo.id,
+          text: ''
+        }
+        binding.value.handleDrop(el)
       } else {
         // 如果是 page 内组件，则更改移动位置
         dragObject.style.left = (e.offsetX - dragInfo.offsetX) + 'px'
@@ -101,7 +116,7 @@ Vue.directive('droppable', {
     }
     el.addEventListener('dragover', el.onDragOver, false)
     el.addEventListener('dragenter', el.onDragEnter, false)
-    el.addEventListener('drop', el.onDrop.bind(vnode), false)
+    el.addEventListener('drop', el.onDrop.bind(binding), false)
     el.addEventListener('dragleave', el.onDragLeave, false)
   },
   unbind: function (el, binding, vnode) {
@@ -113,5 +128,36 @@ Vue.directive('droppable', {
     el.removeEventListener('dragover', el.onDragOver)
     el.removeEventListener('dragleave', el.onDragLeave)
     el.removeEventListener('drag', el.onDrag)
+  }
+})
+
+Vue.directive('moveable', {
+  bind: function (el, binding, vnode) {
+    el.style.position = 'absolute'
+    var startX, startY, initialMouseX, initialMouseY
+    var scale = binding.value
+    console.log('scale:' + scale)
+    function mousemove (e) {
+      var dx = (e.clientX - initialMouseX) / scale
+      var dy = (e.clientY - initialMouseY) / scale
+      el.style.top = (startY + dy) + 'px'
+      el.style.left = (startX + dx) + 'px'
+      return false
+    }
+
+    function mouseup () {
+      document.removeEventListener('mousemove', mousemove)
+      document.removeEventListener('mouseup', mouseup)
+    }
+
+    el.addEventListener('mousedown', function (e) {
+      startX = el.offsetLeft
+      startY = el.offsetTop
+      initialMouseX = e.clientX
+      initialMouseY = e.clientY
+      document.addEventListener('mousemove', mousemove)
+      document.addEventListener('mouseup', mouseup)
+      return false
+    })
   }
 })

@@ -5,8 +5,7 @@ import * as types from '../mutation-types'
 const state = {
   loading: false,
   data: null,
-  error: false,
-  canvasWidth: 200
+  error: false
 }
 
 // getters

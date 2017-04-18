@@ -99,7 +99,7 @@
                 <draggable v-model="pages" :options="{group:'page', animation: 150}" @start="drag=true" @end="drag=false">
                   <transition-group>
                     <div class="preview-page-container" :style="{ width: previewPageWidth + 'px', height: previewPageHeight + 'px' }" v-for="page in pages" :key="page.id">
-                      <Page ref="page" class="preview" :page="page" :widgets="widgets" :style="{ transform: 'scale(' + previewScale + ')'}"></Page>
+                      <Page ref="page" class="preview" :tplid="currTemplate" :pageid="page.id" :widgets="widgets" :scale="canvasScale" :style="{ transform: 'scale(' + previewScale + ')'}"></Page>
                     </div>
                   </transition-group>
                 </draggable>
@@ -116,7 +116,7 @@
         </Ruler>
         <div ref="canvas" class="page-container">
           <div class="canvas-container" v-bind:style="{ width: canvasWidth + 'px', height: canvasHeight + 'px' }">
-            <Page class="canvas page" :page="pages[currPage]" :widgets="widgets" :style="{ transform: 'scale(' + canvasScale + ')'}">
+            <Page class="canvas page" :tplid="currTemplate" :pageid="currPage" :scale="canvasScale" :widgets="widgets" :style="{ transform: 'scale(' + canvasScale + ')'}">
             </Page>
           </div>
         </div>
@@ -144,7 +144,8 @@ export default {
     return {
       counter: 0,
       pages: this.template.pages,
-      currPage: 0,
+      currTemplate: this.template.id,
+      currPage: '1',
       screenWidth: 0,
       screenHeight: 0,
       pageWidth: 0,
@@ -174,7 +175,7 @@ export default {
       return this.pageHeight === 0 ? 0 : this.canvasHeight * this.pageWidth / this.pageHeight
     },
     canvasScale: function () {
-      if (this.page === 0) return 0.55
+      if (this.pageWidth === 0) return 0
       return this.canvasWidth / this.pageWidth
     },
     widgets: function () {

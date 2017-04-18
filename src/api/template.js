@@ -7,12 +7,12 @@ const _templates = [
     'title': 'The table of bank',
     'pages': [
       {
-        id: 1,
+        id: '1',
         order: 1,
         name: 'page-1',
         components: [
           {
-            id: 1,
+            id: '1',
             width: '100mm',
             heiht: '30mm',
             left: '100mm',
@@ -24,101 +24,16 @@ const _templates = [
         ]
       },
       {
-        id: 2,
+        id: '2',
         order: 2,
-        name: 'page-1',
+        name: 'page-2',
         components: [
           {
-            id: 1,
+            id: '1',
             width: '100mm',
             heiht: '30mm',
-            left: '100mm',
-            top: '100mm',
-            fontSize: '14px',
-            widgetId: 'widget1',
-            text: ''
-          }
-        ]
-      },
-      {
-        id: 3,
-        order: 3,
-        name: 'page-1',
-        components: [
-          {
-            id: 1,
-            width: '100mm',
-            heiht: '30mm',
-            left: '100mm',
-            top: '100mm',
-            fontSize: '14px',
-            widgetId: 'widget1',
-            text: ''
-          }
-        ]
-      },
-      {
-        id: 3,
-        order: 3,
-        name: 'page-1',
-        components: [
-          {
-            id: 1,
-            width: '100mm',
-            heiht: '30mm',
-            left: '100mm',
-            top: '100mm',
-            fontSize: '14px',
-            widgetId: 'widget1',
-            text: ''
-          }
-        ]
-      },
-      {
-        id: 3,
-        order: 3,
-        name: 'page-1',
-        components: [
-          {
-            id: 1,
-            width: '100mm',
-            heiht: '30mm',
-            left: '100mm',
-            top: '100mm',
-            fontSize: '14px',
-            widgetId: 'widget1',
-            text: ''
-          }
-        ]
-      },
-      {
-        id: 3,
-        order: 3,
-        name: 'page-1',
-        components: [
-          {
-            id: 1,
-            width: '100mm',
-            heiht: '30mm',
-            left: '100mm',
-            top: '100mm',
-            fontSize: '14px',
-            widgetId: 'widget1',
-            text: ''
-          }
-        ]
-      },
-      {
-        id: 3,
-        order: 3,
-        name: 'page-1',
-        components: [
-          {
-            id: 1,
-            width: '100mm',
-            heiht: '30mm',
-            left: '100mm',
-            top: '100mm',
+            left: '10mm',
+            top: '200mm',
             fontSize: '14px',
             widgetId: 'widget1',
             text: ''
@@ -150,6 +65,17 @@ export default {
       // simulate random checkout failure.
       (Math.random() > 0.1 || navigator.userAgent.indexOf('PhantomJS') > -1)
         ? cb(template)
+        : errorCb && errorCb('请求错误')
+    }, 1000)
+  },
+
+  getPages (tplId, cb, errorCb) {
+    const template = _templates.find(t => t.id === tplId)
+
+    setTimeout(() => {
+      // simulate random checkout failure.
+      (Math.random() > 0 || navigator.userAgent.indexOf('PhantomJS') > -1)
+        ? cb(template.pages)
         : errorCb && errorCb('请求错误')
     }, 1000)
   }
