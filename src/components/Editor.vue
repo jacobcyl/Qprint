@@ -42,11 +42,22 @@
     margin: 0 auto;
     transform-origin: 0 0;
   }
+  .page-list-item{
+    padding: 10px;
+    margin-bottom: 5px;
+  }
+  .page-list-item.curr-page{
+    background: #cdd7e2;
+  }
+  .page-list-item:hover{
+    background: #e8ecf1;
+  }
   .preview-page-container {
     width: 180px;
     height: 180px;
     margin: 0 auto;
-    margin-bottom: 16px;
+    cursor: pointer;
+    /*margin-bottom: 16px;*/
   }
   .page-container {
     margin: auto;
@@ -98,8 +109,10 @@
               <div ref="content" class="content">
                 <draggable v-model="pages" :options="{group:'page', animation: 150}" @start="drag=true" @end="drag=false">
                   <transition-group>
-                    <div class="preview-page-container" :style="{ width: previewPageWidth + 'px', height: previewPageHeight + 'px' }" v-for="page in pages" :key="page.id">
-                      <Page ref="page" class="preview" :tplid="currTemplate" :pageid="page.id" :widgets="widgets" :scale="canvasScale" :style="{ transform: 'scale(' + previewScale + ')'}"></Page>
+                    <div v-for="page in pages" :key="page.id" :class="['page-list-item', isCurrPage(page.id) ? 'curr-page' : '']">
+                      <div @click="switchPage(page.id)" :class="['preview-page-container']" :style="{ width: previewPageWidth + 'px', height: previewPageHeight + 'px' }" title="点击编辑该页面">
+                        <Page ref="page" class="preview" :tplid="currTemplate" :pageid="page.id" :widgets="widgets" :scale="canvasScale" :style="{ transform: 'scale(' + previewScale + ')'}"></Page>
+                      </div>
                     </div>
                   </transition-group>
                 </draggable>
@@ -116,7 +129,7 @@
         </Ruler>
         <div ref="canvas" class="page-container">
           <div class="canvas-container" v-bind:style="{ width: canvasWidth + 'px', height: canvasHeight + 'px' }">
-            <Page class="canvas page" :tplid="currTemplate" :pageid="currPage" :scale="canvasScale" :widgets="widgets" :style="{ transform: 'scale(' + canvasScale + ')'}">
+            <Page v-if="currPage !== ''" class="canvas page" :tplid="currTemplate" :pageid="currPage" :scale="canvasScale" :widgets="widgets" :style="{ transform: 'scale(' + canvasScale + ')'}">
             </Page>
           </div>
         </div>
@@ -129,7 +142,7 @@
   </div>
 </template>
 <script>
-// import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import ToolBar from './ToolBar.vue'
 import Page from './Page.vue'
 import draggable from 'vuedraggable'
@@ -145,7 +158,6 @@ export default {
       counter: 0,
       pages: this.template.pages,
       currTemplate: this.template.id,
-      currPage: '1',
       screenWidth: 0,
       screenHeight: 0,
       pageWidth: 0,
@@ -167,6 +179,9 @@ export default {
     }
   },
   computed: {
+    ...mapGetters({
+      currPage: 'template/currPage'
+    }),
     canvasHeight: function () {
       const {innerHeight} = window
       return (innerHeight - 80)
@@ -188,6 +203,9 @@ export default {
     }
   },
   methods: {
+    ...mapActions({
+      'switchPage': 'template/switchPage'
+    }),
     scrollHanle (evt) {
       // console.log(evt)
     },
@@ -200,6 +218,9 @@ export default {
     },
     handleDrop (evt, data) {
       console.log('dropped')
+    },
+    isCurrPage: function (pageId) {
+      return this.currPage === pageId
     }
   },
   components: {

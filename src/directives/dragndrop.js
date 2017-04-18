@@ -3,18 +3,9 @@ Vue.directive('draggable', {
   bind: function (el, binding, vnode) {
     console.log(binding)
     el.onDragStart = function (e) {
-      // console.log('drag start')
-      if (e.target.dataset.type === 'component') {
-        setTimeout(function () {
-          e.target.classList.add('hide')
-          e.target.style.transform = 'scale(0.5)'
-        })
-      }
-      // e.target.style.transform = 'scale(0.5)'
       e.target.classList.add('dragging')
       // e.dataTransfer.dropEffect = 'move'
       e.dataTransfer.effectAllowed = 'move'
-
       // pass drag info
       const dragInfo = {
         type: e.target.dataset.type,
@@ -40,16 +31,21 @@ Vue.directive('draggable', {
     el.setAttribute('draggable', true)
     el.addEventListener('dragstart', el.onDragStart.bind(binding), false)
     el.addEventListener('dragend', el.onDragEnd, false)
+  },
+  unbind: function (el, binding, vnode) {
+    el.removeEventListener('dragstart', el.onDragStart)
+    el.removeEventListener('dragend', el.onDragEnd)
   }
 })
 
 Vue.directive('droppable', {
   bind: function (el, binding, vnode) {
+    const {handleDrop} = binding.value
     // drop
-    el.onDrop = function (e) {
-      // console.log('drop')
-      console.log(e)
-      e.preventDefault()
+    el.onDrop = e => {
+      if (e.preventDefault) {
+        e.preventDefault()
+      }
       var data = e.dataTransfer.getData('text/plain')
 
       try {
@@ -57,6 +53,7 @@ Vue.directive('droppable', {
       } catch (e) {
         return
       }
+      // 如果设置了目标放置容器，则判断是否放置
       if (dragInfo.dropArea && e.target.classList.value.split(' ').indexOf(dragInfo.dropArea) === -1) {
         return
       }
@@ -70,32 +67,37 @@ Vue.directive('droppable', {
         dragCopy.id = 'component_' + dragInfo.id + '_' + Date.now()
         dragCopy.dataset.type = 'component'
         // touch the listener to the new copy component
-        dragCopy.onDragStart = dragObject.onDragStart
-        dragCopy.onDragEnd = dragObject.onDragEnd
+        // dragCopy.onDragStart = dragObject.onDragStart
+        // dragCopy.onDragEnd = dragObject.onDragEnd
         // copy the event handler to the new node
-        dragCopy.addEventListener('dragstart', dragCopy.onDragStart, false)
-        dragCopy.addEventListener('dragend', dragCopy.onDragEnd, false)
+        // dragCopy.addEventListener('dragstart', dragCopy.onDragStart, false)
+        // dragCopy.addEventListener('dragend', dragCopy.onDragEnd, false)
 
         dragCopy.style.left = (e.offsetX - dragInfo.offsetX) + 'px'
         dragCopy.style.top = (e.offsetY - dragInfo.offsetY) + 'px'
         // copy a new object to the droppable area
         // e.target.appendChild(dragCopy)
-        const el = {
-          id: dragCopy.id,
-          left: (e.offsetX - dragInfo.offsetX) + 'px',
-          top: (e.offsetY - dragInfo.offsetY) + 'px',
-          fontSize: '14px',
-          widgetId: dragInfo.id,
-          text: ''
+
+        if (typeof handleDrop === 'function') {
+          let el = {
+            id: dragCopy.id,
+            left: (e.offsetX - dragInfo.offsetX) + 'px',
+            top: (e.offsetY - dragInfo.offsetY) + 'px',
+            fontSize: '14px',
+            widgetId: dragInfo.id,
+            text: ''
+          }
+          binding.value.handleDrop(el)
         }
-        binding.value.handleDrop(el)
       } else {
         // 如果是 page 内组件，则更改移动位置
         dragObject.style.left = (e.offsetX - dragInfo.offsetX) + 'px'
         dragObject.style.top = (e.offsetY - dragInfo.offsetY) + 'px'
         console.log('drag inside')
       }
-      // e.stopPropagation()
+      if (e.stopPropagation) {
+        e.stopPropagation()
+      }
       return false
     }
     // drag over
@@ -134,8 +136,8 @@ Vue.directive('droppable', {
 Vue.directive('moveable', {
   bind: function (el, binding, vnode) {
     el.style.position = 'absolute'
-    var startX, startY, initialMouseX, initialMouseY
-    var scale = binding.value
+    let startX, startY, initialMouseX, initialMouseY
+    const {scale, handleMove} = binding.value
     console.log('scale:' + scale)
     function mousemove (e) {
       var dx = (e.clientX - initialMouseX) / scale
@@ -145,9 +147,16 @@ Vue.directive('moveable', {
       return false
     }
 
-    function mouseup () {
+    function mouseup (e) {
       document.removeEventListener('mousemove', mousemove)
       document.removeEventListener('mouseup', mouseup)
+      if (typeof handleMove === 'function') {
+        handleMove({
+          id: el.id,
+          left: el.style.left,
+          top: el.style.top
+        })
+      }
     }
 
     el.addEventListener('mousedown', function (e) {

@@ -5,7 +5,8 @@ import * as types from '../mutation-types'
 const state = {
   loading: false,
   data: null,
-  error: false
+  error: false,
+  currPage: ''
 }
 
 // getters
@@ -13,7 +14,7 @@ const getters = {
   data: state => state.data,
   loading: state => state.loading,
   error: state => state.error,
-  canvasWidth: state => state.canvasWidth
+  currPage: state => state.currPage
 }
 
 // actions
@@ -22,9 +23,12 @@ const actions = {
     commit(types.TEMPLATE_LOADING)
     template.get(
       id,
-      (templates) => commit(types.TEMPLATE_SUCCESS, { templates }),
+      (template) => commit(types.TEMPLATE_SUCCESS, { template }),
       (error) => commit(types.TEMPLATE_ERROR, { error })
     )
+  },
+  switchPage ({ commit }, pageId) {
+    commit(types.TEMPLATE_SWITCH_PAGE, pageId)
   }
 }
 
@@ -33,13 +37,17 @@ const mutations = {
   [types.TEMPLATE_LOADING] (state) {
     state.loading = true
   },
-  [types.TEMPLATE_SUCCESS] (state, { templates }) {
+  [types.TEMPLATE_SUCCESS] (state, { template }) {
     state.loading = false
-    state.data = templates
+    state.data = template
+    state.currPage = template.pages.length > 0 ? template.pages[0].id : ''
   },
   [types.TEMPLATE_ERROR] (state, { error }) {
     state.loading = false
     state.error = error
+  },
+  [types.TEMPLATE_SWITCH_PAGE] (state, pageId) {
+    state.currPage = pageId
   }
 }
 

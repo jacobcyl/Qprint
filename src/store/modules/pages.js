@@ -31,6 +31,12 @@ const actions = {
       pageid,
       component
     })
+  },
+  updateComponent ({commit}, {pageid, component}) {
+    commit(types.PAGE_UPDATE_COMPONENT, {
+      pageid,
+      component
+    })
   }
 }
 
@@ -53,6 +59,20 @@ const mutations = {
       if (e.id === pageid) index = i
     })
     index > -1 ? state.data[index].components.unshift(component) : ''
+  },
+  [types.PAGE_UPDATE_COMPONENT] (state, { pageid, component }) {
+    state.data.forEach((e, i) => {
+      if (e.id === pageid) {
+        state.data[i].components.forEach((se, si) => {
+          if (se.id === component.id) {
+            state.data[i].components[si] = {
+              ...state.data[i].components[si],
+              ...component
+            }
+          }
+        })
+      }
+    })
   }
 }
 

@@ -23,7 +23,7 @@
   <div class="page" size="A4" v-droppable="{handleDrop: handleDrop}">
     <template v-if="pages.length && currPage">
       <template v-for="component in currPage.components">
-        <div v-moveable:scale="pageScale" class="component" draggable="false" :style="{left: component.left, top: component.top}">{{ widgetText(component.id) }}</div>
+        <div :id="component.id" v-moveable="{scale: pageScale, handleMove: handleMove}" class="component" draggable="false" :style="{left: component.left, top: component.top}">{{ widgetText(component.widgetId) }}</div>
       </template>
     </template>
     <Spin size="large" fix v-if="loading"></Spin>
@@ -68,7 +68,8 @@
     methods: {
       ...mapActions({
         'getPages': 'pages/getPages',
-        'addComponent': 'pages/addComponent'
+        'addComponent': 'pages/addComponent',
+        'updateComponent': 'pages/updateComponent'
       }),
       widgetText: function (id) {
         let widget = this.widgets.find(t => t.id === id)
@@ -77,6 +78,14 @@
       },
       handleDrop: function (el) {
         this.addComponent({pageid: this.pageid, component: el})
+      },
+      handleMove: function (el) {
+        const {id} = el
+        if (id === undefined) {
+          console.error('undefine component id')
+          return
+        }
+        this.updateComponent({pageid: this.pageid, component: el})
       }
     },
     components: {
