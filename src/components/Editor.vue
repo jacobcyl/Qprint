@@ -53,11 +53,41 @@
     background: #e8ecf1;
   }
   .preview-page-container {
-    width: 180px;
-    height: 180px;
+    width: 85px;
+    height: 120px;
     margin: 0 auto;
     cursor: pointer;
+    box-shadow: 0 0 0.5cm rgba(0,0,0,0.5);
     /*margin-bottom: 16px;*/
+  }
+  .page-list-item .page-title {
+    display: block;
+    text-align: center;
+    padding: 5px;
+  }
+  .add-page {
+    width: 85px;
+    height: 120px;
+    margin: 0 auto;
+    cursor: pointer;
+    position: relative;
+    box-shadow: 0 0 0.5cm rgba(0,0,0,0.5);
+  }
+  .add-page:before, .add-page:after {
+    content: ' ';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #c5c5c5;
+  }
+  .add-page:before {
+    width: 2px;
+    height: 50px;
+  }
+  .add-page:after {
+    width: 40px;
+    height: 2px;
   }
   .page-container {
     margin: auto;
@@ -100,22 +130,28 @@
 <template>
   <div>
     <div id="workspace">
-      <ToolBar :title="template.title"></ToolBar>
       <!-- left panel -->
       <div class="panel left-panel">
         <div class="tab-container">
           <Tabs value="name1" type="card">
             <Tab-pane label="页面" name="name1">
               <div ref="content" class="content">
-                <draggable v-model="pages" :options="{group:'page', animation: 150}" @start="drag=true" @end="drag=false">
-                  <transition-group>
-                    <div v-for="page in pages" :key="page.id" :class="['page-list-item', isCurrPage(page.id) ? 'curr-page' : '']">
-                      <div @click="switchPage(page.id)" :class="['preview-page-container']" :style="{ width: previewPageWidth + 'px', height: previewPageHeight + 'px' }" title="点击编辑该页面">
-                        <Page ref="page" class="preview" :tplid="currTemplate" :pageid="page.id" :widgets="widgets" :scale="canvasScale" :style="{ transform: 'scale(' + previewScale + ')'}"></Page>
+                <template v-if="pages.length > 0">
+                  <draggable v-model="pages" :options="{group:'page', animation: 150}" @start="drag=true" @end="drag=false">
+                    <transition-group>
+                      <div v-for="page in pages" :key="page.id" :class="['page-list-item', isCurrPage(page.id) ? 'curr-page' : '']">
+                        <div @click="switchPage(page.id)" :class="['preview-page-container']" :style="{ width: previewPageWidth + 'px', height: previewPageHeight + 'px' }" title="点击编辑该页面">
+                          <Page ref="page" class="preview" :tplid="currTemplate" :page="page" :widgets="widgets" :scale="canvasScale" :style="{ transform: 'scale(' + previewScale + ')'}"></Page>
+                        </div>
+                        <span class="page-title">{{ page.title }}</span>
                       </div>
-                    </div>
-                  </transition-group>
-                </draggable>
+                    </transition-group>
+                  </draggable>
+                </template>
+                <div class="page-list-item">
+                  <div @click="modalAddPage = true"  class="add-page">
+                  </div>
+                </div>
               </div>
             </Tab-pane>
             <Tab-pane label="资料" name="name2">
@@ -129,7 +165,7 @@
         </Ruler>
         <div ref="canvas" class="page-container">
           <div class="canvas-container" v-bind:style="{ width: canvasWidth + 'px', height: canvasHeight + 'px' }">
-            <Page v-if="currPage !== ''" class="canvas page" :tplid="currTemplate" :pageid="currPage" :scale="canvasScale" :widgets="widgets" :style="{ transform: 'scale(' + canvasScale + ')'}">
+            <Page v-if="currPage" class="canvas page" :tplid="currTemplate" :page="currPage" :scale="canvasScale" :widgets="widgets" :style="{ transform: 'scale(' + canvasScale + ')'}">
             </Page>
           </div>
         </div>
@@ -138,7 +174,19 @@
       <div class="panel right-panel">
         <div id='widget1' data-type="widget" class='ui-draggable' draggable='true' v-draggable="{droparea:dropArea, handleDrop:handleDrop}">测试</div>
       </div>
+      <ToolBar :title="template.name"></ToolBar>
     </div>
+    <Modal v-model="modalAddPage" width="360">
+      <p slot="header" style="color:#f60;text-align:center">
+        <span>新建页面</span>
+      </p>
+      <div style="text-align:center">
+        <Input v-model="newPageTitle" placeholder="请输入页面标题" style="width: 300px"></Input>
+      </div>
+      <div slot="footer">
+        <Button type="warning" size="large" long :loading="addPageLoading" @click="createPage">保存</Button>
+      </div>
+    </Modal>
   </div>
 </template>
 <script>
@@ -155,8 +203,6 @@ export default {
   name: 'editor',
   data () {
     return {
-      counter: 0,
-      pages: this.template.pages,
       currTemplate: this.template.id,
       screenWidth: 0,
       screenHeight: 0,
@@ -169,19 +215,35 @@ export default {
         maxScrollbarLength: 80,
         wheelSpeed: 0.1
       },
-      dropArea: 'page'
+      dropArea: 'page',
+      modalAddPage: false,
+      newPageTitle: '' // 新建页面标题
     }
   },
   props: {
     template: {
       type: Object,
       required: true
+    },
+    pages: {
+      type: Array,
+      required: true
     }
   },
   computed: {
     ...mapGetters({
-      currPage: 'template/currPage'
+      currPageId: 'pages/currPage',
+      addPageLoading: 'pages/addPageLoading',
+      addPageData: 'pages/addPageData',
+      addPageError: 'pages/addPageError',
+      test: 'pages/test'
     }),
+    // 当前页
+    currPage: function () {
+      let currpage = this.pages.find(p => p.id === this.currPageId)
+      if (currpage) return currpage
+      else return null
+    },
     canvasHeight: function () {
       const {innerHeight} = window
       return (innerHeight - 80)
@@ -190,8 +252,12 @@ export default {
       return this.pageHeight === 0 ? 0 : this.canvasHeight * this.pageWidth / this.pageHeight
     },
     canvasScale: function () {
-      if (this.pageWidth === 0) return 0
+      if (this.pageWidth === 0) return 1
       return this.canvasWidth / this.pageWidth
+    },
+    // 是否重新计算相关页面的尺寸
+    reCalcPage: function () {
+      return this.pages.length > 0
     },
     widgets: function () {
       return [
@@ -204,8 +270,21 @@ export default {
   },
   methods: {
     ...mapActions({
-      'switchPage': 'template/switchPage'
+      'addPage': 'pages/addPage',
+      'switchPage': 'pages/switchPage'
     }),
+    createPage () {
+      if (this.newPageTitle === '') {
+        this.$Message.error('页面标题不能为空')
+        return
+      }
+      this.addPage({
+        tplId: this.currTemplate,
+        page: {
+          title: this.newPageTitle
+        }
+      })
+    },
     scrollHanle (evt) {
       // console.log(evt)
     },
@@ -221,6 +300,39 @@ export default {
     },
     isCurrPage: function (pageId) {
       return this.currPage === pageId
+    },
+    reCalcPageSize: function () {
+      this.$nextTick(function () {
+        if (this.$refs.page && this.$refs.page.length > 0) {
+          this.pageWidth = this.$refs.page[0].$el.clientWidth
+          this.pageHeight = this.$refs.page[0].$el.clientHeight
+
+          this.previewPageWidth = this.pageWidth * this.previewPageHeight / this.pageHeight
+          this.previewScale = this.previewPageWidth / this.pageWidth
+
+          // this.screenWidth = this.$refs.screen.$el.clientWidth
+          // this.screenHeight = this.$refs.screen.$el.clientHeight
+        }
+        this.screenWidth = this.$refs.screen.$el.clientWidth
+        this.screenHeight = this.$refs.screen.$el.clientHeight
+        // scroll to center horizontal
+        this.$refs.screen.$el.scrollLeft = (this.$refs.canvas.clientWidth - this.$refs.screen.$el.clientWidth) / 2
+      })
+    }
+  },
+  watch: {
+    reCalcPage: function (v) {
+      console.log('reCalcPage has changed')
+      this.reCalcPageSize()
+    },
+    addPageError: function (v) {
+      if (v) this.$Message.error(v)
+    },
+    addPageData: function (v) {
+      if (v) {
+        this.$Message.success('创建成功')
+        this.modalAddPage = false
+      }
     }
   },
   components: {
@@ -232,17 +344,7 @@ export default {
     Draggable
   },
   mounted () {
-    if (this.$refs.page && this.$refs.page.length > 0) {
-      this.pageWidth = this.$refs.page[0].$el.clientWidth
-      this.pageHeight = this.$refs.page[0].$el.clientHeight
-
-      this.previewPageWidth = this.pageWidth * this.previewPageHeight / this.pageHeight
-      this.previewScale = this.previewPageWidth / this.pageWidth
-    }
-    // scroll to center horizontal
-    this.$refs.screen.$el.scrollLeft = (this.$refs.canvas.clientWidth - this.$refs.screen.$el.clientWidth) / 2
-    this.screenWidth = this.$refs.screen.$el.clientWidth
-    this.screenHeight = this.$refs.screen.$el.clientHeight
+    this.reCalcPageSize()
     window.addEventListener('resize', this.handleResize)
   },
   beforeDestroy () {

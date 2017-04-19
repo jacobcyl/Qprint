@@ -1,11 +1,10 @@
 <template>
     <div class="demo-spin-article">
+      {{ template }}
         <div v-if="template" class="content">
-          <Editor
-            :template="template"
-          ></Editor>
+          <Editor :template="template" :pages="pages"></Editor>
         </div>
-        <Spin size="large" fix v-if="loading"></Spin>
+        <Spin size="large" fix v-if="templateLoading || pagesLoading"></Spin>
     </div>
 </template>
 <script>
@@ -21,44 +20,36 @@
       Editor
     },
     computed: mapGetters({
-      loading: 'template/loading',
+      templateLoading: 'template/loading',
       template: 'template/data',
-      error: 'template/error'
+      templateError: 'template/error',
+      pagesLoading: 'pages/loading',
+      pages: 'pages/data',
+      pagesError: 'pages/error'
     }),
     methods: {
-      toast (msg, type) {
-        if (msg.length === 0) return
-        switch (type) {
-          case 'success':
-            this.$Message.success(msg)
-            break
-          case 'info':
-            this.$Message.info(msg)
-            break
-          case 'waring':
-            this.$Message.waring(msg)
-            break
-          case 'error':
-            this.$Message.error(msg)
-            break
-          default:
-            this.$Message.info(msg)
-            break
-        }
-      },
       ...mapActions({
-        'getTemplate': 'template/getTemplate'
+        'getTemplate': 'template/getTemplate',
+        'getPages': 'pages/getPages',
+        'getComponents': 'components/getComponents'
       })
     },
     created () {
       // 组件创建完后获取数据，
       // 此时 data 已经被 observed 了
       this.getTemplate(this.id)
+      this.getPages(this.id)
+      this.getComponents(this.id)
     },
     watch: {
       // 如果路由有变化，会再次执行该方法
-      error: function () {
-        this.toast(this.error, 'error')
+      templateError: function (v) {
+        if (v) this.$Message.error(v)
+      },
+      pagesError: function (v) {
+        if (v) {
+          this.$Message.error(v)
+        }
       }
     }
   }

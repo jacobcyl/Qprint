@@ -5,16 +5,14 @@ import * as types from '../mutation-types'
 const state = {
   loading: false,
   data: null,
-  error: false,
-  currPage: ''
+  error: false
 }
 
 // getters
 const getters = {
   data: state => state.data,
   loading: state => state.loading,
-  error: state => state.error,
-  currPage: state => state.currPage
+  error: state => state.error
 }
 
 // actions
@@ -26,9 +24,6 @@ const actions = {
       (template) => commit(types.TEMPLATE_SUCCESS, { template }),
       (error) => commit(types.TEMPLATE_ERROR, { error })
     )
-  },
-  switchPage ({ commit }, pageId) {
-    commit(types.TEMPLATE_SWITCH_PAGE, pageId)
   }
 }
 
@@ -39,15 +34,13 @@ const mutations = {
   },
   [types.TEMPLATE_SUCCESS] (state, { template }) {
     state.loading = false
+    state.error = false
     state.data = template
-    state.currPage = template.pages.length > 0 ? template.pages[0].id : ''
   },
   [types.TEMPLATE_ERROR] (state, { error }) {
     state.loading = false
+    state.data = null
     state.error = error
-  },
-  [types.TEMPLATE_SWITCH_PAGE] (state, pageId) {
-    state.currPage = pageId
   }
 }
 

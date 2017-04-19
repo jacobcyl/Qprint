@@ -21,6 +21,27 @@
       })
     },
     watch: {
+      screenWidth: function (v) {
+        console.log('screenWidth change:' + v)
+        this.$nextTick(function () {
+          this.ratio = this.$refs.measure.clientWidth / 100000
+          this.init()
+        })
+      },
+      screenHeight: function (v) {
+        console.log('screenHeight change:' + v)
+        this.$nextTick(function () {
+          this.ratio = this.$refs.measure.clientWidth / 100000
+          this.init()
+        })
+      },
+      scale: function (v) {
+        console.log('scale change:' + v)
+        this.$nextTick(function () {
+          this.ratio = this.$refs.measure.clientWidth / 100000
+          this.init()
+        })
+      }
     },
     data () {
       return {
@@ -78,20 +99,20 @@
     },
     methods: {
       init: function () {
-        if (!this.hctx) {
-          this.hctx = this.$refs.hruler.getContext('2d')
-          this.hctx.font = `12px -apple-system, ".SFNSText-Regular", "SF UI Text", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Zen Hei", sans-serif`
-          this.hctx.lineWidth = 1
-          this.hctx.strokeStyle = this.fgColor
-          this.hctx.textBaseline = 'middle'
-        }
-        if (!this.vctx) {
-          this.vctx = this.$refs.vruler.getContext('2d')
-          this.vctx.font = `12px -apple-system, ".SFNSText-Regular", "SF UI Text", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Zen Hei", sans-serif`
-          this.vctx.lineWidth = 1
-          this.vctx.strokeStyle = this.fgColor
-          this.vctx.textBaseline = 'middle'
-        }
+        // if (!this.hctx) {
+        this.hctx = this.$refs.hruler.getContext('2d')
+        this.hctx.font = `12px -apple-system, ".SFNSText-Regular", "SF UI Text", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Zen Hei", sans-serif`
+        this.hctx.lineWidth = 1
+        this.hctx.strokeStyle = this.fgColor
+        this.hctx.textBaseline = 'middle'
+        // }
+        // if (!this.vctx) {
+        this.vctx = this.$refs.vruler.getContext('2d')
+        this.vctx.font = `12px -apple-system, ".SFNSText-Regular", "SF UI Text", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Zen Hei", sans-serif`
+        this.vctx.lineWidth = 1
+        this.vctx.strokeStyle = this.fgColor
+        this.vctx.textBaseline = 'middle'
+        // }
         this.drawVRuler()
         this.drawHRuler()
       },

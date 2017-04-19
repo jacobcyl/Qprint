@@ -21,9 +21,9 @@
 </style>
 <template>
   <div class="page" size="A4" v-droppable="{handleDrop: handleDrop}">
-    <template v-if="pages.length && currPage">
-      <template v-for="component in currPage.components">
-        <div :id="component.id" v-moveable="{scale: pageScale, handleMove: handleMove}" class="component" draggable="false" :style="{left: component.left, top: component.top}">{{ widgetText(component.widgetId) }}</div>
+    <template v-if="currComponents.length > 0">
+      <template v-for="component in currComponents">
+        <div v-if="scale !== 1" :id="component.id" v-moveable="{scale: scale, handleMove: handleMove}" class="component" draggable="false" :style="{left: component.left, top: component.top}">{{ widgetText(component.widgetId) }}</div>
       </template>
     </template>
     <Spin size="large" fix v-if="loading"></Spin>
@@ -34,11 +34,11 @@
   import {mapGetters, mapActions} from 'vuex'
   export default {
     props: {
-      tplid: {
-        type: String,
+      page: {
+        type: Object,
         required: true
       },
-      pageid: {
+      tplid: {
         type: String,
         required: true
       },
@@ -53,12 +53,15 @@
     },
     computed: {
       ...mapGetters({
-        loading: 'pages/loading',
-        error: 'pages/error',
-        pages: 'pages/data'
+        loading: 'components/loading',
+        error: 'components/error',
+        components: 'components/data'
       }),
-      currPage: function () {
-        return this.pages.find(t => t.id === this.pageid)
+      currComponents: function () {
+        let cs = this.components.find(t => t.pageId === this.page.id)
+        console.log(this.pageid)
+        if (cs) return cs.components
+        else return []
       },
       pageScale: function () {
         console.log(this.scale)
@@ -67,9 +70,8 @@
     },
     methods: {
       ...mapActions({
-        'getPages': 'pages/getPages',
-        'addComponent': 'pages/addComponent',
-        'updateComponent': 'pages/updateComponent'
+        'addComponent': 'components/addComponent',
+        'updateComponent': 'components/updateComponent'
       }),
       widgetText: function (id) {
         let widget = this.widgets.find(t => t.id === id)
@@ -77,7 +79,7 @@
         else return 'undefined'
       },
       handleDrop: function (el) {
-        this.addComponent({pageid: this.pageid, component: el})
+        this.addComponent({tplId: this.tplid, pageId: this.page.id, component: el})
       },
       handleMove: function (el) {
         const {id} = el
@@ -85,13 +87,13 @@
           console.error('undefine component id')
           return
         }
-        this.updateComponent({pageid: this.pageid, component: el})
+        this.updateComponent({tplId: this.tplid, pageId: this.page.id, component: el})
       }
     },
     components: {
     },
     created () {
-      this.getPages({tplid: this.tplid})
+      // this.getComponents({tplId: this.tplid, pageId: this.page.id})
     }
   }
 </script>

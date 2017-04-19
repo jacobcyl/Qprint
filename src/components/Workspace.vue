@@ -47,6 +47,16 @@
         padding: 10px 0 20px;
         color: #9ea7b4;
     }
+    .card-body{
+      height: 185px;
+    }
+    .add-template {
+    }
+    .add-template p{
+      width: 100%;
+      margin-top: 10px;
+      display: inline-block;
+    }
 </style>
 <template>
     <div class="layout">
@@ -58,10 +68,23 @@
             </div>
         </Menu>
         <div class="layout-content">
-          <Row :gutter="16" v-if="templates.length > 0">
+          <Row :gutter="16">
+            <Col :xs="24" :sm="12" :md="8" :lg="6">
+              <Card style="margin-bottom: 16px;">
+                <p slot="title">新建模板</p>
+                <div class="card-body">
+                  <div class="add-template">
+                    <p><Input v-model="name" placeholder="请输入模板名称"></Input></p>
+                    <p><Button type="success" long @click="handleSaveTpl">保存</Button></p>
+                  </div>
+                </div>
+              </Card>
+            </Col>
+            <template v-if="templates.length > 0">
               <Col :xs="24" :sm="12" :md="8" :lg="6" v-for="(template, index) in templates" :key="template.id">
-                <print-template :title="template.title" :tpl-id="template.id" />
+                <print-template :title="template.name" :tpl-id="template.id" />
               </Col>
+            </template>
           </Row>
           <Spin size="large" fix v-if="loading"></Spin>
         </div>
@@ -75,6 +98,11 @@
   import PrintTemplate from './PrintTemplate.vue'
 
   export default {
+    data () {
+      return {
+        name: ''
+      }
+    },
     components: {
       PrintTemplate
     },
@@ -82,12 +110,54 @@
       ...mapGetters({
         loading: 'workspace/loading',
         error: 'workspace/error',
-        templates: 'workspace/templates'
+        templates: 'workspace/templates',
+        addingError: 'workspace/addingError'
       })
     },
-    methods: mapActions({
-      'getAllTemplates': 'workspace/getAllTemplates'
-    }),
+    methods: {
+      ...mapActions({
+        'getAllTemplates': 'workspace/getAllTemplates',
+        'addTemplate': 'workspace/addTemplate'
+      }),
+      handleSaveTpl: function () {
+        let tpl = {
+          name: this.name
+        }
+        this.addTemplate(tpl)
+      },
+      toast: function (msg, type) {
+        if (msg.length === 0) return
+        switch (type) {
+          case 'success':
+            this.$Message.success(msg)
+            break
+          case 'info':
+            this.$Message.info(msg)
+            break
+          case 'waring':
+            this.$Message.waring(msg)
+            break
+          case 'error':
+            this.$Message.error(msg)
+            break
+          default:
+            this.$Message.info(msg)
+            break
+        }
+      }
+    },
+    watch: {
+      // 如果路由有变化，会再次执行该方法
+      error: function () {
+        this.toast(this.error, 'error')
+      },
+      addingError: function () {
+        console.log(this.addingError)
+        if (this.addingError) {
+          this.toast(this.addingError, 'error')
+        }
+      }
+    },
     created () {
       this.getAllTemplates()
     }
