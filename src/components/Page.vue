@@ -59,7 +59,6 @@
       }),
       currComponents: function () {
         let cs = this.components.find(t => t.pageId === this.page.id)
-        console.log(this.pageid)
         if (cs) return cs.components
         else return []
       },

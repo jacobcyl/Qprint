@@ -64,7 +64,7 @@
         </router-link>
         <a class="divider"></a>
         <template v-for="btn in buttons">
-          <a>
+          <a @click="performAction(btn.action)">
             <Tooltip :content="btn.name">
               <Icon :type="btn.icon" size="20"></Icon>
               <span class="btn-name" v-show="showIconName">{{ btn.name }}</span>
@@ -76,9 +76,18 @@
   </div>
 </template>
 <script>
+import {mapActions, mapMutations} from 'vuex'
 export default {
   props: {
     title: {
+      type: String,
+      required: true
+    },
+    tplid: {
+      type: String,
+      required: true
+    },
+    pageid: {
       type: String,
       required: true
     }
@@ -89,14 +98,44 @@ export default {
       buttons: {
         undo: {
           icon: 'ios-undo',
-          name: '撤销'
+          name: '撤销',
+          action: 'undo'
         },
         redo: {
           icon: 'ios-redo',
-          name: '重做'
+          name: '重做',
+          action: 'redo'
         }
       }
     }
+  },
+  computed: {
+    ...mapMutations({
+      canUndo: 'components/canUndo',
+      canRedo: 'components/canRedo'
+    })
+  },
+  methods: {
+    ...mapActions({
+      undo: 'components/undo',
+      redo: 'components/redo',
+      flushHistory: 'components/flushHistory'
+    }),
+    performAction: function (action) {
+      switch (action) {
+        case 'undo':
+          console.log('undo')
+          this.undo({tplId: this.tplid, pageId: this.pageid})
+          break
+        case 'redo':
+          console.log('redo')
+          this.redo({tplId: this.tplid, pageId: this.pageid})
+          break
+      }
+    }
+  },
+  beforeDestroy () {
+    console.log('haha going to destroy')
   }
 }
 </script>

@@ -6,6 +6,7 @@ import workspace from './modules/workspace'
 import template from './modules/template'
 import pages from './modules/pages'
 import components from './modules/components'
+// import history from './modules/history'
 
 import createLogger from 'vuex/dist/logger'
 

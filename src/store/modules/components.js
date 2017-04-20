@@ -1,4 +1,5 @@
 import componentApi from '../../api/componentApi'
+import historyApi from '../../api/historyApi'
 import * as types from '../mutation-types'
 
 // initial state
@@ -10,7 +11,14 @@ const state = {
     loading: false,
     data: null,
     error: false
-  }
+  },
+  history: {
+    currPageId: null,
+    past: [],
+    present: [],
+    future: []
+  },
+  currPageId: null
 }
 
 // getters
@@ -20,7 +28,9 @@ const getters = {
   error: state => state.error,
   addComponentLoading: state => state.addComponent.loading,
   addComponentData: state => state.addComponent.data,
-  addComponentError: state => state.addComponent.error
+  addComponentError: state => state.addComponent.error,
+  canUndo: state => state.history.past.length > 0,
+  canRedo: state => state.history.future.length > 0
 }
 
 // actions
@@ -49,8 +59,31 @@ const actions = {
       tplId,
       pageId,
       component,
-      (component) => commit(types.COMPONENT_UPDATE_SUCCESS, { component }),
+      (component) => commit(types.COMPONENT_UPDATE_SUCCESS, { pageId, component }),
       (error) => commit(types.COMPONENT_UPDATE_ERROR, { error })
+    )
+  },
+
+  // action history
+  undo ({commit}, {tplId, pageId}) {
+    historyApi.undo(
+      tplId,
+      pageId,
+      (components) => commit(types.COMPONENT_UNDO_SUCCESS, {components}),
+      (error) => commit(types.COMPONENT_UNDO_ERROR, {error})
+    )
+  },
+  redo ({commit}, {tplId, pageId}) {
+    historyApi.redo(
+      tplId,
+      pageId,
+      (components) => commit(types.COMPONENT_REDO_SUCCESS, {components}),
+      (error) => commit(types.COMPONENT_REDO_ERROR, {error})
+    )
+  },
+  flushHistory ({commit}) {
+    historyApi.flushHistory(
+      (components) => commit(types.COMPONENT_FLUSH_HISTORY, {components})
     )
   }
 }
@@ -67,10 +100,16 @@ const mutations = {
     state.addComponent.data = component
     state.error = false
     let inserted = false
+    // 记录当前以及上一次component状态
+    let currCommponentState = []
+    let previousCompomentState = []
+
     state.data.forEach((e, i) => {
       if (e.pageId === pageId) {
+        previousCompomentState = state.data[i].components.slice(0)
         state.data[i].components.push(component)
         inserted = true
+        currCommponentState = state.data[i].components
       }
     })
     if (!inserted) {
@@ -78,7 +117,31 @@ const mutations = {
         pageId,
         components: [component]
       })
+      currCommponentState = [component]
     }
+
+    // check if page has been switched
+    if (state.currPageId !== pageId) {
+      // flush and initialize history
+      state.history = {
+        currPageId: null,
+        past: [previousCompomentState],
+        present: currCommponentState,
+        future: []
+      }
+    } else {
+      // record the history
+      const {past, present} = state.history
+      state.history = {
+        currPageId: pageId,
+        past: [ ...past, present ],
+        present: currCommponentState,
+        future: []
+      }
+    }
+
+    // update currPageId
+    state.currPageId = pageId
   },
   [types.COMPONENT_ADD_ERROR] (state, { error }) {
     state.addComponent.loading = false
@@ -104,17 +167,71 @@ const mutations = {
   // update component
   [types.COMPONENT_UPDATE_LOADING] (state) {
   },
-  [types.COMPONENT_UPDATE_SUCCESS] (state, {component}) {
+  [types.COMPONENT_UPDATE_SUCCESS] (state, {pageId, component}) {
+    // 记录当前以及上一次component状态
+    let previousCompomentState = []
     state.data.forEach((e, i) => {
-      if (e.id === component.id) {
-        state.data[i] = {
-          ...state.data[i],
-          ...component
-        }
+      if (e.pageId === pageId) {
+        state.data[i].components.forEach((se, si) => {
+          if (se.id === component.id) {
+            // 保存变更前状态
+            previousCompomentState = state.data[i].components.slice(0)
+            state.data[i].components[si] = {
+              ...state.data[i].components[si],
+              ...component
+            }
+
+            // check if page has been switched
+            if (state.currPageId !== pageId) {
+              // flush history and initialize it
+              state.history = {
+                currPageId: null,
+                past: [previousCompomentState],
+                present: state.data[i].components,
+                future: []
+              }
+            } else {
+              // record the history
+              const {past, present} = state.history
+              state.history = {
+                currPageId: pageId,
+                past: [ ...past, present ],
+                present: state.data[i].components,
+                future: []
+              }
+            }
+            // update currPageId
+            state.currPageId = pageId
+          }
+        })
       }
     })
   },
   [types.COMPONENT_UPDATE_ERROR] (state) {
+  },
+
+  // action history
+  [types.COMPONENT_UNDO_SUCCESS] (state, {components}) {
+    state.data = components
+  },
+  [types.COMPONENT_UNDO_ERROR] (state, {error}) {
+    console.log(error)
+  },
+  // redo
+  [types.COMPONENT_REDO_SUCCESS] (state, {components}) {
+    state.data = components
+  },
+  [types.COMPONENT_REDO_ERROR] (state, {error}) {
+    console.log(error)
+  },
+  // flush
+  [types.COMPONENT_FLUSH_HISTORY] (state) {
+    state.history = {
+      currPageId: null,
+      past: [],
+      present: state.data,
+      future: []
+    }
   }
 }
 

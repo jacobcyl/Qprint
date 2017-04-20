@@ -140,7 +140,7 @@
                   <draggable v-model="pages" :options="{group:'page', animation: 150}" @start="drag=true" @end="drag=false">
                     <transition-group>
                       <div v-for="page in pages" :key="page.id" :class="['page-list-item', isCurrPage(page.id) ? 'curr-page' : '']">
-                        <div @click="switchPage(page.id)" :class="['preview-page-container']" :style="{ width: previewPageWidth + 'px', height: previewPageHeight + 'px' }" title="点击编辑该页面">
+                        <div @click="handleSwitchPage(page.id)" :class="['preview-page-container']" :style="{ width: previewPageWidth + 'px', height: previewPageHeight + 'px' }" title="点击编辑该页面">
                           <Page ref="page" class="preview" :tplid="currTemplate" :page="page" :widgets="widgets" :scale="canvasScale" :style="{ transform: 'scale(' + previewScale + ')'}"></Page>
                         </div>
                         <span class="page-title">{{ page.title }}</span>
@@ -174,7 +174,7 @@
       <div class="panel right-panel">
         <div id='widget1' data-type="widget" class='ui-draggable' draggable='true' v-draggable="{droparea:dropArea, handleDrop:handleDrop}">测试</div>
       </div>
-      <ToolBar :title="template.name"></ToolBar>
+      <ToolBar :title="template.name" :tplid="currTemplate" :pageid="currPage.id"></ToolBar>
     </div>
     <Modal v-model="modalAddPage" width="360">
       <p slot="header" style="color:#f60;text-align:center">
@@ -235,8 +235,7 @@ export default {
       currPageId: 'pages/currPage',
       addPageLoading: 'pages/addPageLoading',
       addPageData: 'pages/addPageData',
-      addPageError: 'pages/addPageError',
-      test: 'pages/test'
+      addPageError: 'pages/addPageError'
     }),
     // 当前页
     currPage: function () {
@@ -271,8 +270,13 @@ export default {
   methods: {
     ...mapActions({
       'addPage': 'pages/addPage',
-      'switchPage': 'pages/switchPage'
+      'switchPage': 'pages/switchPage',
+      'flushHistory': 'components/flushHistory'
     }),
+    handleSwitchPage: function (pageId) {
+      this.switchPage(pageId)
+      this.flushHistory()
+    },
     createPage () {
       if (this.newPageTitle === '') {
         this.$Message.error('页面标题不能为空')
@@ -344,6 +348,7 @@ export default {
     Draggable
   },
   mounted () {
+    this.flushHistory()
     this.reCalcPageSize()
     window.addEventListener('resize', this.handleResize)
   },

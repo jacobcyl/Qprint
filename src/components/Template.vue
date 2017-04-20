@@ -1,6 +1,5 @@
 <template>
     <div class="demo-spin-article">
-      {{ template }}
         <div v-if="template" class="content">
           <Editor :template="template" :pages="pages"></Editor>
         </div>
