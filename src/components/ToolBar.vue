@@ -13,15 +13,16 @@
   }
   .toolbar-left{
     display: flex;
-    align-self: left;
   }
-  .toolbar .toolbar-container .toolbar-left a.name {
+  .toolbar .toolbar-container .toolbar-left span {
     width: 218px;
     text-align: left;
     margin-left: 10px;
     font-size: 14px;
     overflow: hidden;
     border-radius: 0px;
+    display: inline-flex;
+    align-items: center;
 }
   .toolbar-container .toolbar-left, .toolbar-container .toolbar-right{
     white-space: nowrap;
@@ -29,8 +30,8 @@
   .toolbar-container a{
     font-size: 20px;
     width: 30px;
-    height: 38px;
-    line-height: 38px;
+    /*height: 38px;*/
+    /*line-height: 38px;*/
     margin: 0 3px;
     display: inline-block;
     text-align: center;
@@ -46,37 +47,36 @@
     display: inline-block;
     width: 1px;
     background: #bbbbbb;
-    height: 22px;
+    /*height: 22px;*/
     margin: 7px 2px;
-}
+  }
   .btn-name {
     font-size: 14px;
-    line-height: 20px;
+    /*line-height: 20px;*/
   }
 </style>
 <template>
   <div id="toolbar" class="toolbar">
     <div class="toolbar-container">
       <div class="toolbar-left">
-        <a class="name">{{ title }}</a>
+        <span class="name">{{ title }}</span>
         <router-link :to="{name: 'home'}">
           <Icon type="arrow-return-left" size="20"></Icon>
         </router-link>
         <a class="divider"></a>
-        <template v-for="btn in buttons">
-          <a @click="performAction(btn.action)">
-            <Tooltip :content="btn.name">
-              <Icon :type="btn.icon" size="20"></Icon>
-              <span class="btn-name" v-show="showIconName">{{ btn.name }}</span>
+        <Button-group>
+          <template v-for="btn in buttons">
+            <Tooltip :content="btn.title">
+              <Button type="ghost" :icon="btn.icon" @click="performAction(btn.action)" :disabled="disabled(btn.name)"></Button>
             </Tooltip>
-          </a>
-        </template>
+          </template>
+        </Button-group>
       </div>
     </div>
   </div>
 </template>
 <script>
-import {mapActions, mapMutations} from 'vuex'
+import {mapActions, mapGetters} from 'vuex'
 export default {
   props: {
     title: {
@@ -98,19 +98,21 @@ export default {
       buttons: {
         undo: {
           icon: 'ios-undo',
-          name: '撤销',
+          name: 'undo',
+          title: '撤销',
           action: 'undo'
         },
         redo: {
           icon: 'ios-redo',
-          name: '重做',
+          name: 'redo',
+          title: '重做',
           action: 'redo'
         }
       }
     }
   },
   computed: {
-    ...mapMutations({
+    ...mapGetters({
       canUndo: 'components/canUndo',
       canRedo: 'components/canRedo'
     })
@@ -131,6 +133,16 @@ export default {
           console.log('redo')
           this.redo({tplId: this.tplid, pageId: this.pageid})
           break
+      }
+    },
+    disabled: function (btnName) {
+      switch (btnName) {
+        case 'undo':
+          return !this.canUndo
+        case 'redo':
+          return !this.canRedo
+        default:
+          return false
       }
     }
   },

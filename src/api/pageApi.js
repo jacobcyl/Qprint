@@ -10,6 +10,7 @@ export default {
         pages = pagesObj.pages
         if (pages === undefined) errorCb('页面数据错误')
         else cb(pages)
+        return
       }
     }
     cb(pages)

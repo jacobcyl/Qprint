@@ -41,7 +41,7 @@ const actions = {
       tplId,
       pageId,
       component,
-      (component) => commit(types.COMPONENT_ADD_SUCCESS, { pageId, component }),
+      (component, history) => commit(types.COMPONENT_ADD_SUCCESS, { pageId, component, history }),
       (error) => commit(types.COMPONENT_ADD_ERROR, { error })
     )
   },
@@ -59,7 +59,7 @@ const actions = {
       tplId,
       pageId,
       component,
-      (component) => commit(types.COMPONENT_UPDATE_SUCCESS, { pageId, component }),
+      (component, history) => commit(types.COMPONENT_UPDATE_SUCCESS, { pageId, component, history }),
       (error) => commit(types.COMPONENT_UPDATE_ERROR, { error })
     )
   },
@@ -69,7 +69,7 @@ const actions = {
     historyApi.undo(
       tplId,
       pageId,
-      (components) => commit(types.COMPONENT_UNDO_SUCCESS, {components}),
+      (components, history) => commit(types.COMPONENT_UNDO_SUCCESS, {components, history}),
       (error) => commit(types.COMPONENT_UNDO_ERROR, {error})
     )
   },
@@ -77,13 +77,20 @@ const actions = {
     historyApi.redo(
       tplId,
       pageId,
-      (components) => commit(types.COMPONENT_REDO_SUCCESS, {components}),
+      (components, history) => commit(types.COMPONENT_REDO_SUCCESS, {components, history}),
       (error) => commit(types.COMPONENT_REDO_ERROR, {error})
     )
   },
-  flushHistory ({commit}) {
+  initHistory ({commit}, {tplId, pageId}) {
+    historyApi.initHistory(
+      tplId,
+      pageId,
+      (history) => commit(types.COMPONENT_INIT_HISTORY, {pageId, history})
+    )
+  },
+  flushHistory ({commit}, {pageId}) {
     historyApi.flushHistory(
-      (components) => commit(types.COMPONENT_FLUSH_HISTORY, {components})
+      (msg) => commit(types.COMPONENT_FLUSH_HISTORY, {pageId, msg})
     )
   }
 }
@@ -95,21 +102,16 @@ const mutations = {
     state.addComponent.loading = true
     state.addComponent.error = false
   },
-  [types.COMPONENT_ADD_SUCCESS] (state, { pageId, component }) {
+  [types.COMPONENT_ADD_SUCCESS] (state, { pageId, component, history }) {
     state.addComponent.loading = false
     state.addComponent.data = component
     state.error = false
     let inserted = false
-    // 记录当前以及上一次component状态
-    let currCommponentState = []
-    let previousCompomentState = []
 
     state.data.forEach((e, i) => {
       if (e.pageId === pageId) {
-        previousCompomentState = state.data[i].components.slice(0)
         state.data[i].components.push(component)
         inserted = true
-        currCommponentState = state.data[i].components
       }
     })
     if (!inserted) {
@@ -117,31 +119,10 @@ const mutations = {
         pageId,
         components: [component]
       })
-      currCommponentState = [component]
     }
 
-    // check if page has been switched
-    if (state.currPageId !== pageId) {
-      // flush and initialize history
-      state.history = {
-        currPageId: null,
-        past: [previousCompomentState],
-        present: currCommponentState,
-        future: []
-      }
-    } else {
-      // record the history
-      const {past, present} = state.history
-      state.history = {
-        currPageId: pageId,
-        past: [ ...past, present ],
-        present: currCommponentState,
-        future: []
-      }
-    }
-
-    // update currPageId
-    state.currPageId = pageId
+    // record the history
+    state.history = history
   },
   [types.COMPONENT_ADD_ERROR] (state, { error }) {
     state.addComponent.loading = false
@@ -157,6 +138,13 @@ const mutations = {
     state.loading = false
     state.data = components
     state.error = false
+
+    // 初始化history
+    state.history = {
+      past: [],
+      present: state.data,
+      future: []
+    }
   },
   [types.COMPONENT_LIST_ERROR] (state, { error }) {
     state.loading = false
@@ -167,71 +155,55 @@ const mutations = {
   // update component
   [types.COMPONENT_UPDATE_LOADING] (state) {
   },
-  [types.COMPONENT_UPDATE_SUCCESS] (state, {pageId, component}) {
-    // 记录当前以及上一次component状态
-    let previousCompomentState = []
+  [types.COMPONENT_UPDATE_SUCCESS] (state, {pageId, component, history}) {
     state.data.forEach((e, i) => {
       if (e.pageId === pageId) {
         state.data[i].components.forEach((se, si) => {
           if (se.id === component.id) {
-            // 保存变更前状态
-            previousCompomentState = state.data[i].components.slice(0)
             state.data[i].components[si] = {
               ...state.data[i].components[si],
               ...component
             }
-
-            // check if page has been switched
-            if (state.currPageId !== pageId) {
-              // flush history and initialize it
-              state.history = {
-                currPageId: null,
-                past: [previousCompomentState],
-                present: state.data[i].components,
-                future: []
-              }
-            } else {
-              // record the history
-              const {past, present} = state.history
-              state.history = {
-                currPageId: pageId,
-                past: [ ...past, present ],
-                present: state.data[i].components,
-                future: []
-              }
-            }
-            // update currPageId
-            state.currPageId = pageId
           }
         })
       }
     })
+    state.history = history
   },
   [types.COMPONENT_UPDATE_ERROR] (state) {
   },
 
   // action history
-  [types.COMPONENT_UNDO_SUCCESS] (state, {components}) {
+  [types.COMPONENT_UNDO_SUCCESS] (state, {components, history}) {
     state.data = components
+    state.history = history
   },
   [types.COMPONENT_UNDO_ERROR] (state, {error}) {
     console.log(error)
   },
   // redo
-  [types.COMPONENT_REDO_SUCCESS] (state, {components}) {
+  [types.COMPONENT_REDO_SUCCESS] (state, {components, history}) {
     state.data = components
+    state.history = history
   },
   [types.COMPONENT_REDO_ERROR] (state, {error}) {
     console.log(error)
   },
+  // initialize history
+  [types.COMPONENT_INIT_HISTORY] (state, {history}) {
+    state.history = history
+  },
   // flush
-  [types.COMPONENT_FLUSH_HISTORY] (state) {
+  [types.COMPONENT_FLUSH_HISTORY] (state, {pageId, msg}) {
+    let components = state.data.find(c => c.pageId === pageId)
+    let present = []
+    if (components && components.components && components.components.length > 0) present = components.components.slice(0)
     state.history = {
-      currPageId: null,
       past: [],
-      present: state.data,
+      present: present,
       future: []
     }
+    console.log(msg)
   }
 }
 

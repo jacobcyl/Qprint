@@ -89,7 +89,11 @@
         this.updateComponent({tplId: this.tplid, pageId: this.page.id, component: el})
       }
     },
-    components: {
+    watch: {
+      components: function (v) {
+        console.log('components changed')
+        console.log(v[2].components[0].left)
+      }
     },
     created () {
       // this.getComponents({tplId: this.tplid, pageId: this.page.id})

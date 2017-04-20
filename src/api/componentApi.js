@@ -28,23 +28,27 @@ export default {
 
     // 记录操作前状态
     let previousState = []
+    // 记录当前页面组件状态
+    let currState = []
 
     if (components) {
       components.forEach((e, i) => {
         if (e.pageId === pageId) {
           components[i].components.forEach((se, si) => {
             if (se.id === component.id) {
-              // copy the old components state
+              // 复制一份操作前的页面组件状态
               previousState = components[i].components.slice(0)
               components[i].components[si] = {
                 ...components[i].components[si],
                 ...component
               }
+              // 复制一份操作后的页面状态
+              currState = components[i].components.slice(0)
               this.storeData(this.generateKey(tplId), components)
-              // 保存成功
-              cb(component)
               // 记录操作历史
-              historyApi.historyRecord(tplId, pageId, previousState)
+              let history = historyApi.historyRecord(currState, previousState)
+              // 调用更新成功回调函数
+              cb(component, history)
               updated = true
             }
           })
@@ -52,6 +56,11 @@ export default {
       })
     }
     if (!updated) errorCb('component 数据错误')
+  },
+
+  // 批量更新components
+  updateComponents: function (tplId, pageId, components) {
+
   },
 
   // 添加一个控件
@@ -62,6 +71,8 @@ export default {
     let componentId = 'component_' + time
     // 记录操作前状态
     let previousState = []
+    // 记录当前状态
+    let currState = []
 
     let newComponent = {
       ...component,
@@ -69,35 +80,34 @@ export default {
       createdAt: time
     }
 
+    let inserted = false
     if (components) {
-      let inserted = false
       components.forEach((e, i) => {
         if (e.pageId === pageId) {
           // copy the old components state
           previousState = components[i].components.slice(0)
           components[i].components.push(newComponent)
           inserted = true
+          // 当前页面状态
+          currState = components[i].components.slice(0)
         }
       })
-      if (!inserted) {
-        components.push({
-          pageId,
-          components: [newComponent]
-        })
-        previousState = [newComponent]
-      }
-    } else {
-      components = [{
+    }
+    // 如果没有找到对应的页面并且插入该组件，则创建一个新的页面
+    if (!inserted) {
+      components.push({
         pageId,
         components: [newComponent]
-      }]
+      })
+      // 当前页面状态
+      currState = [{...newComponent}]
     }
     try {
       this.storeData(this.generateKey(tplId), components)
       // localStorage.setItem(componentKey, JSON.stringify(components))
-      cb(newComponent)
       // 记录操作历史
-      historyApi.historyRecord(tplId, pageId, previousState)
+      let history = historyApi.historyRecord(currState, previousState)
+      cb(newComponent, history)
     } catch (e) {
       errorCb('保存失败')
     }
@@ -108,7 +118,7 @@ export default {
   fetchData: function (tplId) {
     let components = localStorage.getItem(this.generateKey(tplId))
     if (components) return JSON.parse(components)
-    else return null
+    else return []
   },
   storeData: function (key, data) {
     localStorage.setItem(key, JSON.stringify(data))

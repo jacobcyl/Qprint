@@ -28,43 +28,41 @@ export default {
     }
     return true
   },
-  getHistory: function (tplId, pageId) {
-    let currHistoryKey = sessionStorage.getItem('currHK')
-    let currHK = 'tplId' + ':' + pageId
-    // 如果不是当前页面的历史记录，则删除历史记录再重新开始记录
-    if (currHistoryKey !== currHK) {
-      sessionStorage.removeItem('currH')
-      sessionStorage.setItem('currHK', currHK)
+  initHistory: function (tplId, pageId, cb) {
+    let present = []
+    const allComponents = this.fetchData(tplId)
+    if (allComponents) {
+      let currPageComponents = allComponents.find(c => c.pageId === pageId)
+      if (currPageComponents) present = currPageComponents.components
     }
+
+    let history = {
+      past: [],
+      present: present,
+      future: []
+    }
+    this.storeHistory(history)
+    cb(history)
+  },
+  getHistory: function () {
     let history = sessionStorage.getItem('currH')
     if (history) return JSON.parse(history)
     else return null
   },
-  storeHistory: function (tplId, pageId, history) {
-    let currHK = 'tplId' + ':' + pageId
-    sessionStorage.setItem('currHK', currHK)
+  storeHistory: function (history) {
     sessionStorage.setItem('currH', JSON.stringify(history))
   },
   flushHistory: function (cb) {
     sessionStorage.removeItem('currH')
-    cb()
+    cb('flush history successfully')
   },
-  historyRecord: function (tplId, pageId, previousState) {
-    const allComponents = this.fetchData(tplId)
-    let newPresent = null
-    if (allComponents) {
-      let components = allComponents.find(c => c.pageId === pageId)
-      if (components) {
-        newPresent = components.components
-      }
-    }
-
-    let history = this.getHistory(tplId, pageId)
+  historyRecord: function (newPresent, previousState) {
+    let history = this.getHistory()
     if (history) {
       const {past, present} = history
 
       if (this.compareObj(present, newPresent)) {
-        return false
+        return history
       }
 
       history = {
@@ -80,11 +78,12 @@ export default {
       }
     }
     // 保存历史记录
-    this.storeHistory(tplId, pageId, history)
+    this.storeHistory(history)
+    return history
   },
   // 撤销操作
   undo: function (tplId, pageId, cb, errorCb) {
-    let history = this.getHistory(tplId, pageId)
+    let history = this.getHistory()
     if (history) {
       const { past, present, future } = history
       if (past.length === 0) {
@@ -106,8 +105,8 @@ export default {
             allComponents[i].components = previous
             this.storeData(this.generateKey(tplId), allComponents)
             // 保存历史记录
-            this.storeHistory(tplId, pageId, history)
-            cb(allComponents)
+            this.storeHistory(history)
+            cb(allComponents, history)
             return true
           }
         })
@@ -117,7 +116,7 @@ export default {
   },
   // 恢复撤销
   redo: function (tplId, pageId, cb, errorCb) {
-    let history = this.getHistory(tplId, pageId)
+    let history = this.getHistory()
     if (history) {
       const { past, present, future } = history
       if (future.length === 0) {
@@ -139,8 +138,10 @@ export default {
             allComponents[i].components = next
             this.storeData(this.generateKey(tplId), allComponents)
             // 保存历史记录
-            this.storeHistory(tplId, pageId, history)
-            cb(allComponents)
+            this.storeHistory(history)
+            setTimeout(function () {
+              cb(allComponents, history)
+            }, 100)
             return true
           }
         })

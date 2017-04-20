@@ -271,11 +271,13 @@ export default {
     ...mapActions({
       'addPage': 'pages/addPage',
       'switchPage': 'pages/switchPage',
-      'flushHistory': 'components/flushHistory'
+      'flushHistory': 'components/flushHistory',
+      'initHistory': 'components/initHistory'
     }),
     handleSwitchPage: function (pageId) {
       this.switchPage(pageId)
-      this.flushHistory()
+      // this.flushHistory({pageId: this.page.id})
+      this.initHistory({tplId: this.template.id, pageId: pageId})
     },
     createPage () {
       if (this.newPageTitle === '') {
@@ -347,13 +349,18 @@ export default {
     Ruler,
     Draggable
   },
+  created () {
+    console.log('created')
+  },
   mounted () {
-    this.flushHistory()
+    this.initHistory({tplId: this.template.id, pageId: this.currPageId})
     this.reCalcPageSize()
     window.addEventListener('resize', this.handleResize)
   },
   beforeDestroy () {
     window.removeEventListener('resize', this.handleResize)
+  },
+  destroyed () {
   }
 }
 </script>
