@@ -160,10 +160,11 @@ const mutations = {
       if (e.pageId === pageId) {
         state.data[i].components.forEach((se, si) => {
           if (se.id === component.id) {
-            state.data[i].components[si] = {
+            state.data[i].components.splice(si, 1, {
               ...state.data[i].components[si],
               ...component
-            }
+            })
+            // state.data[i].components.push(component)
           }
         })
       }

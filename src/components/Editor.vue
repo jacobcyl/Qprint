@@ -126,6 +126,9 @@
   .hide{
     transform:translateX(-9999px);
   }
+  .widget-list {
+    margin-top: 10px;
+  }
 </style>
 <template>
   <div>
@@ -134,6 +137,7 @@
       <div class="panel left-panel">
         <div class="tab-container">
           <Tabs value="name1" type="card">
+          <!-- tab 1 -->
             <Tab-pane label="页面" name="name1">
               <div ref="content" class="content">
                 <template v-if="pages.length > 0">
@@ -154,7 +158,25 @@
                 </div>
               </div>
             </Tab-pane>
-            <Tab-pane label="资料" name="name2">
+            <!-- tab 2 -->
+            <Tab-pane label="资料控件" name="name2">
+              <div>
+                <Row>
+                  <Col span="18">
+                    <Input type="text" v-model="newWidgetName" placeholder="请输入控件显示内容"></Input>
+                  </Col>
+                  <Col span="4" offset="1">
+                      <Button type="ghost" @click="handleAddWidget">新增</Button>
+                  </Col>
+                </Row>
+              </div>
+              <div v-if="widgets.length > 0" class="widget-list">
+                <Row>
+                  <Col span="24">
+                    <div v-for="widget in widgets" :id="widget.id" data-type="widget" class='ui-draggable' draggable='true' v-draggable="{droparea:dropArea, handleDrop:handleDrop}">{{ widget.text }}</div>
+                  </Col>
+                </Row>
+              </div>
             </Tab-pane>
           </Tabs>
         </div>
@@ -172,8 +194,8 @@
       </VuePerfectScrollbar>
       <!-- right panel -->
       <div class="panel right-panel">
-        <div id='widget1' data-type="widget" class='ui-draggable' draggable='true' v-draggable="{droparea:dropArea, handleDrop:handleDrop}">测试</div>
       </div>
+      <!-- tool bar -->
       <ToolBar :title="template.name" :tplid="currTemplate" :pageid="currPage.id"></ToolBar>
     </div>
     <Modal v-model="modalAddPage" width="360">
@@ -217,7 +239,8 @@ export default {
       },
       dropArea: 'page',
       modalAddPage: false,
-      newPageTitle: '' // 新建页面标题
+      newPageTitle: '', // 新建页面标题
+      newWidgetName: '' // 新建控件
     }
   },
   props: {
@@ -235,7 +258,8 @@ export default {
       currPageId: 'pages/currPage',
       addPageLoading: 'pages/addPageLoading',
       addPageData: 'pages/addPageData',
-      addPageError: 'pages/addPageError'
+      addPageError: 'pages/addPageError',
+      widgets: 'widgets/data'
     }),
     // 当前页
     currPage: function () {
@@ -257,14 +281,6 @@ export default {
     // 是否重新计算相关页面的尺寸
     reCalcPage: function () {
       return this.pages.length > 0
-    },
-    widgets: function () {
-      return [
-        {
-          id: 'widget1',
-          text: 'hahahah'
-        }
-      ]
     }
   },
   methods: {
@@ -272,12 +288,29 @@ export default {
       'addPage': 'pages/addPage',
       'switchPage': 'pages/switchPage',
       'flushHistory': 'components/flushHistory',
-      'initHistory': 'components/initHistory'
+      'initHistory': 'components/initHistory',
+      'getWidgets': 'widgets/getAll',
+      'addWidget': 'widgets/add',
+      'updateWidget': 'widgets/update'
     }),
     handleSwitchPage: function (pageId) {
       this.switchPage(pageId)
       // this.flushHistory({pageId: this.page.id})
       this.initHistory({tplId: this.template.id, pageId: pageId})
+    },
+    handleAddWidget: function () {
+      console.log('add widget')
+      if (this.newWidgetName === '') {
+        this.$Message.error('控件内容不能为空')
+        return
+      }
+      this.addWidget({
+        tplId: this.template.id,
+        widget: {
+          text: this.newWidgetName
+        }
+      })
+      this.newWidgetName = ''
     },
     createPage () {
       if (this.newPageTitle === '') {
@@ -305,7 +338,7 @@ export default {
       console.log('dropped')
     },
     isCurrPage: function (pageId) {
-      return this.currPage === pageId
+      return this.currPageId === pageId
     },
     reCalcPageSize: function () {
       this.$nextTick(function () {
@@ -355,6 +388,7 @@ export default {
   mounted () {
     this.initHistory({tplId: this.template.id, pageId: this.currPageId})
     this.reCalcPageSize()
+    this.getWidgets(this.template.id)
     window.addEventListener('resize', this.handleResize)
   },
   beforeDestroy () {

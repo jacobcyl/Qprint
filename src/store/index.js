@@ -6,7 +6,7 @@ import workspace from './modules/workspace'
 import template from './modules/template'
 import pages from './modules/pages'
 import components from './modules/components'
-// import history from './modules/history'
+import widgets from './modules/widgets'
 
 import createLogger from 'vuex/dist/logger'
 
@@ -24,7 +24,8 @@ const store = new Vuex.Store({
     workspace,
     template,
     pages,
-    components
+    components,
+    widgets
   },
   plugins
 })
