@@ -25,12 +25,17 @@
   }
   .left-panel {
     width: 100% !important;
+    border: none !important;
   }
   #workspace {
     position: relative !important;
     overflow: scroll !important;
   }
+  .modal {
+    visibility: hidden;
+  }
  }
+
   #workspace {
     position: fixed;
     top: 0;
@@ -56,12 +61,12 @@
   }
   .middle-panel {
     left: 280px;
-    right: 280px;
+    right: 350px;
     background: #f0f0f2;
   }
   .right-panel {
     right: 0;
-    width: 280px;
+    width: 350px;
     z-index: 4;
     border-left: 1px solid #aaaaaa;
   }
@@ -138,18 +143,7 @@
     background: #e3e8ee;
     padding:16px;
   }
-
-  /**/
-  .ui-draggable {
-    background-color: #5bc0de;
-    display: inline-block;
-    text-align: center;
-    border-radius: 3px;
-    margin-right: 10px;
-    cursor:pointer;
-    padding: 6px 20px;
-    color: #fff;
-  }
+  /* component */
   .component{
     position: absolute;
     left: 0;
@@ -158,9 +152,6 @@
   .hide{
     transform:translateX(-9999px);
   }
-  .widget-list {
-    margin-top: 10px;
-  }
 </style>
 <template>
   <div>
@@ -168,9 +159,9 @@
       <!-- left panel -->
       <div class="panel left-panel">
         <div class="tab-container">
-          <Tabs value="name1" type="card">
+          <Tabs value="pages" type="card">
           <!-- tab 1 -->
-            <Tab-pane label="页面" name="name1">
+            <Tab-pane class="page-tab" label="页面" name="pages">
               <div ref="content" class="content">
                 <template v-if="pages.length > 0">
                   <draggable v-model="pages" :options="{group:'page', animation: 150}" @start="drag=true" @end="drag=false">
@@ -191,24 +182,7 @@
               </div>
             </Tab-pane>
             <!-- tab 2 -->
-            <Tab-pane class="noprint" label="资料控件" name="name2">
-              <div>
-                <Row>
-                  <Col span="18">
-                    <Input type="text" v-model="newWidgetName" placeholder="请输入控件显示内容"></Input>
-                  </Col>
-                  <Col span="4" offset="1">
-                      <Button type="ghost" @click="handleAddWidget">新增</Button>
-                  </Col>
-                </Row>
-              </div>
-              <div v-if="widgets.length > 0" class="widget-list">
-                <Row>
-                  <Col span="24">
-                    <div v-for="widget in widgets" :id="widget.id" data-type="widget" class='ui-draggable' draggable='true' v-draggable="{droparea:dropArea, handleDrop:handleDrop}">{{ widget.text }}</div>
-                  </Col>
-                </Row>
-              </div>
+            <Tab-pane class="noprint component-tab" label="控件信息" name="widgets">
             </Tab-pane>
           </Tabs>
         </div>
@@ -226,11 +200,12 @@
       </VuePerfectScrollbar>
       <!-- right panel -->
       <div class="panel right-panel noprint">
+        <WidgetContainer :tplid="currTemplate" :widgets="widgets"></WidgetContainer>
       </div>
       <!-- tool bar -->
       <ToolBar class="noprint" :title="template.name" :tplid="currTemplate" :pageid="currPageId"></ToolBar>
     </div>
-    <Modal v-model="modalAddPage" width="360">
+    <Modal class="modal" v-model="modalAddPage" width="360">
       <p slot="header" style="color:#f60;text-align:center">
         <span>新建页面</span>
       </p>
@@ -248,8 +223,8 @@ import { mapGetters, mapActions } from 'vuex'
 import ToolBar from './ToolBar.vue'
 import Page from './Page.vue'
 import draggable from 'vuedraggable'
-import Draggable from './Draggable.vue'
 import VuePerfectScrollbar from 'vue-perfect-scrollbar'
+import WidgetContainer from './WidgetContainer.vue'
 import Ruler from './Ruler'
 import '@/assets/css/styles.css'
 
@@ -269,7 +244,6 @@ export default {
         maxScrollbarLength: 80,
         wheelSpeed: 0.1
       },
-      dropArea: 'page',
       modalAddPage: false,
       newPageTitle: '', // 新建页面标题
       newWidgetName: '' // 新建控件
@@ -321,28 +295,12 @@ export default {
       'switchPage': 'pages/switchPage',
       'flushHistory': 'components/flushHistory',
       'initHistory': 'components/initHistory',
-      'getWidgets': 'widgets/getAll',
-      'addWidget': 'widgets/add',
-      'updateWidget': 'widgets/update'
+      'getWidgets': 'widgets/getAll'
     }),
     handleSwitchPage: function (pageId) {
       this.switchPage(pageId)
       // this.flushHistory({pageId: this.page.id})
       this.initHistory({tplId: this.template.id, pageId: pageId})
-    },
-    handleAddWidget: function () {
-      console.log('add widget')
-      if (this.newWidgetName === '') {
-        this.$Message.error('控件内容不能为空')
-        return
-      }
-      this.addWidget({
-        tplId: this.template.id,
-        widget: {
-          text: this.newWidgetName
-        }
-      })
-      this.newWidgetName = ''
     },
     createPage () {
       if (this.newPageTitle === '') {
@@ -365,9 +323,6 @@ export default {
     handleResize (evt) {
       this.screenWidth = this.$refs.screen.$el.clientWidth
       this.screenHeight = this.$refs.screen.$el.clientHeight
-    },
-    handleDrop (evt, data) {
-      console.log('dropped')
     },
     isCurrPage: function (pageId) {
       return this.currPageId === pageId
@@ -412,7 +367,7 @@ export default {
     draggable,
     VuePerfectScrollbar,
     Ruler,
-    Draggable
+    WidgetContainer
   },
   created () {
     console.log('created')

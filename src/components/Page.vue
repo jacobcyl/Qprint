@@ -34,6 +34,7 @@
     padding: 5px 10px;
     cursor: default;
     user-select: none;
+    font-size: 12pt;
   }
 </style>
 <template>

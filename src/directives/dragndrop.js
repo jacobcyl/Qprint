@@ -136,18 +136,23 @@ Vue.directive('droppable', {
 Vue.directive('moveable', {
   bind: function (el, binding, vnode) {
     el.style.position = 'absolute'
-    let startX, startY, initialMouseX, initialMouseY
+    let width, height, startX, startY, initialMouseX, initialMouseY
     const {scale, handleMove} = binding.value
     console.log('scale:' + scale)
     function mousemove (e) {
-      var dx = (e.clientX - initialMouseX) / scale
-      var dy = (e.clientY - initialMouseY) / scale
-      el.style.top = (startY + dy) + 'px'
-      el.style.left = (startX + dx) + 'px'
+      let dx = (e.clientX - initialMouseX) / scale
+      let dy = (e.clientY - initialMouseY) / scale
+      let left = startX + dx
+      let top = startY + dy
+      top = top >= 0 ? (top >= height ? height : top) : 0
+      left = left >= 0 ? (left >= width ? width : left) : 0
+      el.style.top = top + 'px'
+      el.style.left = left + 'px'
       return false
     }
 
     function mouseup (e) {
+      // el.classList.remove('selected')
       document.removeEventListener('mousemove', mousemove)
       document.removeEventListener('mouseup', mouseup)
       if (typeof handleMove === 'function') {
@@ -160,8 +165,11 @@ Vue.directive('moveable', {
     }
 
     el.addEventListener('mousedown', function (e) {
+      // el.classList.add('selected')
       startX = el.offsetLeft
       startY = el.offsetTop
+      width = el.parentElement.clientWidth - el.clientWidth
+      height = el.parentElement.clientHeight - el.clientHeight
       initialMouseX = e.clientX
       initialMouseY = e.clientY
       document.addEventListener('mousemove', mousemove)

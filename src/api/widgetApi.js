@@ -8,9 +8,9 @@ export default {
     const time = Date.now()
     let widgetId = 'widget_' + time
     let newWidget = {
+      ...widget,
       id: widgetId,
-      createdAt: time,
-      ...widget
+      createdAt: time
     }
     let widgets = this.getWidgets(tplId)
     widgets.push(newWidget)

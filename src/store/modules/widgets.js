@@ -30,7 +30,7 @@ const actions = {
     widgetApi.add(
       tplId,
       widget,
-      (widgets) => commit(types.WIDGET_ADD_SUCCESS, {widgets}),
+      (widget) => commit(types.WIDGET_ADD_SUCCESS, {widget}),
       (error) => commit(types.WIDGET_ADD_ERROR, {error})
     )
   },
@@ -39,7 +39,7 @@ const actions = {
     widgetApi.update(
       tplId,
       widget,
-      (widgets) => commit(types.WIDGET_UPDATE_SUCCESS, {widgets}),
+      (widget) => commit(types.WIDGET_UPDATE_SUCCESS, {widget}),
       (error) => commit(types.WIDGET_UPDATE_ERROR, {error})
     )
   }

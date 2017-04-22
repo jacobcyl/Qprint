@@ -1,5 +1,5 @@
 div {
-  /*box-sizing: border-box;*/
+  box-sizing: border-box;
 }
 .tab-container, .tab-container > .ivu-tabs-card{
   height: 100%;
@@ -26,6 +26,13 @@ div {
 background: #fff;
 }
 @media print {
+  * {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+  }
+  @page {size: 210mm 297mm; margin:0mm;}
+  html, body {width: 210mm; height: 297mm}
   html, body {
     margin: 0 !important;
     padding: 0 !important;

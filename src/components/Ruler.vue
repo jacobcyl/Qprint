@@ -87,12 +87,12 @@
       vRulerSize: function () {
         return {
           width: 23,
-          height: this.screenHeight / this.scale - 23
+          height: (this.screenHeight - 23) / this.scale
         }
       },
       hRulerSize: function () {
         return {
-          width: this.screenWidth / this.scale - 23,
+          width: (this.screenWidth - 23) / this.scale,
           height: 23
         }
       }
