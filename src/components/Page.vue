@@ -1,15 +1,32 @@
 <style scoped>
+@media print{
+  @page {
+    size: A4 portrait;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
   .page {
-    background: white;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+  }
+}
+  .page {
+    background: url('../assets/images/p1.png');
     display: block;
     margin: 0 auto;
     margin-bottom: 0.5cm;
     box-shadow: 0 0 0.5cm rgba(0,0,0,0.5);
     position: relative;
+    background-size: cover;
+    overflow: hidden;
   }
   .page[size="A4"] {
-    width: 21cm;
-    height: 29.7cm;
+    width: 210mm;
+    height: 297mm;
+    margin: 0;
+    padding: 0;
   }
   .component {
     position: absolute;
@@ -26,7 +43,7 @@
         <div v-if="scale !== 1" :id="component.id" v-moveable="{scale: scale, handleMove: handleMove}" class="component" draggable="false" :style="{left: component.left, top: component.top}">{{ widgetText(component.widgetId) }}</div>
       </template>
     </template>
-    <Spin size="large" fix v-if="loading"></Spin>
+    <Spin class="noprint" size="large" fix v-if="loading"></Spin>
   </div>
 </template>
 

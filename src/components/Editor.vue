@@ -1,4 +1,36 @@
 <style scoped>
+ @media print {
+  .noprint {
+    display: none !important;
+  }
+  .preview {
+    transform: scale(1) !important;
+  }
+  .preview-page-container {
+    width: 210mm !important;
+    height: 297mm !important;
+    border: 0 !important;
+    box-shadow: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .page-list-item, .tab-container {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .panel {
+    top: 0 !important;
+    position: relative !important;
+  }
+  .left-panel {
+    width: 100% !important;
+  }
+  #workspace {
+    position: relative !important;
+    overflow: scroll !important;
+  }
+ }
   #workspace {
     position: fixed;
     top: 0;
@@ -147,19 +179,19 @@
                         <div @click="handleSwitchPage(page.id)" :class="['preview-page-container']" :style="{ width: previewPageWidth + 'px', height: previewPageHeight + 'px' }" title="点击编辑该页面">
                           <Page ref="page" class="preview" :tplid="currTemplate" :page="page" :widgets="widgets" :scale="canvasScale" :style="{ transform: 'scale(' + previewScale + ')'}"></Page>
                         </div>
-                        <span class="page-title">{{ page.title }}</span>
+                        <span class="page-title noprint">{{ page.title }}</span>
                       </div>
                     </transition-group>
                   </draggable>
                 </template>
-                <div class="page-list-item">
+                <div class="page-list-item noprint">
                   <div @click="modalAddPage = true"  class="add-page">
                   </div>
                 </div>
               </div>
             </Tab-pane>
             <!-- tab 2 -->
-            <Tab-pane label="资料控件" name="name2">
+            <Tab-pane class="noprint" label="资料控件" name="name2">
               <div>
                 <Row>
                   <Col span="18">
@@ -182,7 +214,7 @@
         </div>
       </div>
       <!-- middle panel -->
-      <VuePerfectScrollbar ref="screen" class="panel middle-panel" :settings="settings" @ps-scroll-y="scrollHanle">
+      <VuePerfectScrollbar ref="screen" class="panel middle-panel noprint" :settings="settings" @ps-scroll-y="scrollHanle">
         <Ruler :screenWidth="screenWidth" :screenHeight="screenHeight" :scale="canvasScale">
         </Ruler>
         <div ref="canvas" class="page-container">
@@ -193,10 +225,10 @@
         </div>
       </VuePerfectScrollbar>
       <!-- right panel -->
-      <div class="panel right-panel">
+      <div class="panel right-panel noprint">
       </div>
       <!-- tool bar -->
-      <ToolBar :title="template.name" :tplid="currTemplate" :pageid="currPage.id"></ToolBar>
+      <ToolBar class="noprint" :title="template.name" :tplid="currTemplate" :pageid="currPageId"></ToolBar>
     </div>
     <Modal v-model="modalAddPage" width="360">
       <p slot="header" style="color:#f60;text-align:center">

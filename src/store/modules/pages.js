@@ -12,7 +12,7 @@ const state = {
     data: null,
     error: false
   },
-  currPage: ''
+  currPage: '' // 默认当前页为空字符串，若遇到空字符串表明当前未选中任何页面
 }
 
 // getters

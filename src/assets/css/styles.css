@@ -1,3 +1,6 @@
+div {
+  /*box-sizing: border-box;*/
+}
 .tab-container, .tab-container > .ivu-tabs-card{
   height: 100%;
 }
@@ -20,5 +23,24 @@
     background: #f7f7f7 !important;
 }
 .tab-container > .ivu-tabs.ivu-tabs-card>.ivu-tabs-bar .ivu-tabs-tab{
-  background: #fff;
+background: #fff;
+}
+@media print {
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .ivu-tabs-bar {
+    display: none !important;
+  }
+  .tab-container , .ivu-tabs-card , .ivu-tabs-content, .ivu-tabs-tabpane {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .ivu-tabs {
+    overflow: scroll !important;
+  }
+  .ivu-tabs-content {
+    transform: none !important;
+  }
 }

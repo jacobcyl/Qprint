@@ -124,6 +124,10 @@ export default {
       flushHistory: 'components/flushHistory'
     }),
     performAction: function (action) {
+      if (this.pageid === '') {
+        console.info('当前未选中任何页面')
+        return
+      }
       switch (action) {
         case 'undo':
           console.log('undo')
@@ -136,6 +140,9 @@ export default {
       }
     },
     disabled: function (btnName) {
+      if (this.pageid === '') {
+        return false
+      }
       switch (btnName) {
         case 'undo':
           return !this.canUndo
