@@ -50,7 +50,7 @@
     <div v-if="widgets.length > 0" class="widget-list">
       <Row>
         <Col span="24">
-          <div v-for="widget in widgets" :id="widget.id" data-type="widget" class='ui-draggable widget' draggable='true' v-draggable="{droparea:droppableArea, handleDrop:handleDrop}">{{ widget.text }}</div>
+          <div v-for="widget in widgets" :id="widget.id" @click="handleOpenModal('edit', widget)" data-type="widget" class='ui-draggable widget' draggable='true' v-draggable="{droparea:droppableArea, handleDrop:handleDrop}">{{ widget.text }}</div>
         </Col>
       </Row>
     </div>

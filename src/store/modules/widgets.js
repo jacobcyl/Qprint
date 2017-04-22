@@ -76,10 +76,10 @@ const mutations = {
   [types.WIDGET_UPDATE_SUCCESS] (state, {widget}) {
     state.data.forEach((e, i) => {
       if (e.id === widget.id) {
-        state.data[i] = {
+        state.data.splice(i, 1, {
           ...state.data[i],
           ...widget
-        }
+        })
       }
     })
   },
