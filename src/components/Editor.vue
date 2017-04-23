@@ -61,12 +61,12 @@
   }
   .middle-panel {
     left: 280px;
-    right: 350px;
+    right: 320px;
     background: #f0f0f2;
   }
   .right-panel {
     right: 0;
-    width: 350px;
+    width: 320px;
     z-index: 4;
     border-left: 1px solid #aaaaaa;
   }

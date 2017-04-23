@@ -57,7 +57,7 @@
           perWidth: 1, // 1mm
           scale: 1,
           fontScale: 1,
-          fontColor: 'red',
+          fontColor: 'black',
           lineColor: 'red',
           shadow: {
             x: 200,
