@@ -83,7 +83,7 @@ Vue.directive('droppable', {
             id: dragCopy.id,
             left: (e.offsetX - dragInfo.offsetX) + 'px',
             top: (e.offsetY - dragInfo.offsetY) + 'px',
-            fontSize: '14px',
+            fontSize: '14pt',
             widgetId: dragInfo.id,
             text: ''
           }
@@ -133,11 +133,12 @@ Vue.directive('droppable', {
   }
 })
 
-Vue.directive('moveable', {
+Vue.directive('editable', {
   bind: function (el, binding, vnode) {
-    el.style.position = 'absolute'
+    // el.style.position = 'absolute'
     let width, height, startX, startY, initialMouseX, initialMouseY
-    const {scale, handleMove} = binding.value
+    let isMoved = false
+    const {scale, move, select} = binding.value
     console.log('scale:' + scale)
     function mousemove (e) {
       let dx = (e.clientX - initialMouseX) / scale
@@ -146,8 +147,9 @@ Vue.directive('moveable', {
       let top = startY + dy
       top = top >= 0 ? (top >= height ? height : top) : 0
       left = left >= 0 ? (left >= width ? width : left) : 0
-      el.style.top = top + 'px'
-      el.style.left = left + 'px'
+      el.style.top = Math.round(top) + 'px'
+      el.style.left = Math.round(left) + 'px'
+      isMoved = true
       return false
     }
 
@@ -155,17 +157,24 @@ Vue.directive('moveable', {
       // el.classList.remove('selected')
       document.removeEventListener('mousemove', mousemove)
       document.removeEventListener('mouseup', mouseup)
-      if (typeof handleMove === 'function') {
-        handleMove({
+      if (typeof move === 'function') {
+        isMoved && move({
           id: el.id,
           left: el.style.left,
           top: el.style.top
         })
       }
+      isMoved = false
     }
 
     el.addEventListener('mousedown', function (e) {
-      // el.classList.add('selected')
+      e.preventDefault()
+      if (typeof select === 'function') {
+        el.classList.add('select')
+        select(el)
+      }
+      if (e.which !== 1) return // 1: left mouse btn 2: middle mouse btn 3: right mouse btn
+      isMoved = false
       startX = el.offsetLeft
       startY = el.offsetTop
       width = el.parentElement.clientWidth - el.clientWidth
@@ -174,7 +183,17 @@ Vue.directive('moveable', {
       initialMouseY = e.clientY
       document.addEventListener('mousemove', mousemove)
       document.addEventListener('mouseup', mouseup)
-      return false
+
+      if (e.stopPropagation) {
+        e.stopPropagation()
+      }
+      return
     })
+
+    // el.addEventListener('contextmenu', function (e) {
+    //   if (typeof menu === 'function') {
+    //     menu('open menu')
+    //   }
+    // })
   }
 })

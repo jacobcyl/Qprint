@@ -13,12 +13,14 @@ const state = {
     error: false
   },
   history: {
-    currPageId: null,
     past: [],
     present: [],
     future: []
   },
-  currPageId: null
+  selected: {
+    target: null,
+    component: null
+  }
 }
 
 // getters
@@ -30,7 +32,8 @@ const getters = {
   addComponentData: state => state.addComponent.data,
   addComponentError: state => state.addComponent.error,
   canUndo: state => state.history.past.length > 0,
-  canRedo: state => state.history.future.length > 0
+  canRedo: state => state.history.future.length > 0,
+  selected: state => state.selected
 }
 
 // actions
@@ -62,6 +65,13 @@ const actions = {
       (component, history) => commit(types.COMPONENT_UPDATE_SUCCESS, { pageId, component, history }),
       (error) => commit(types.COMPONENT_UPDATE_ERROR, { error })
     )
+  },
+
+  select ({commit}, {pageId, target}) {
+    commit(types.COMPONENT_SELECT, {pageId, target})
+  },
+  unselect ({commit}) {
+    commit(types.COMPONENT_UN_SELECT)
   },
 
   // action history
@@ -152,6 +162,30 @@ const mutations = {
     state.error = error
   },
 
+  // SELECT AND UNSELECT
+  [types.COMPONENT_SELECT] (state, {pageId, target}) {
+    if (target === undefined) return
+    if (state.selected.target && state.selected.target === target) return
+    // 取消原来选中的组件选中状态
+    state.selected.target && state.selected.target.classList.remove('select')
+
+    state.data.forEach((e, i) => {
+      if (e.pageId === pageId) {
+        state.data[i].components.forEach((se, si) => {
+          if (se.id === target.id) {
+            state.selected.target = target
+            state.selected.component = se
+          }
+        })
+      }
+    })
+  },
+  [types.COMPONENT_UN_SELECT] (state) {
+    state.selected.target && state.selected.target.classList.remove('select')
+    state.selected.target = null
+    state.selected.component = null
+  },
+
   // update component
   [types.COMPONENT_UPDATE_LOADING] (state) {
   },
@@ -164,7 +198,7 @@ const mutations = {
               ...state.data[i].components[si],
               ...component
             })
-            // state.data[i].components.push(component)
+            state.selected.component = state.data[i].components[si]
           }
         })
       }

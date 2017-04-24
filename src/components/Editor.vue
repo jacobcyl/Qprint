@@ -159,7 +159,7 @@
       <!-- left panel -->
       <div class="panel left-panel">
         <div class="tab-container">
-          <Tabs value="pages" type="card">
+          <Tabs :value="tabName" type="card">
           <!-- tab 1 -->
             <Tab-pane class="page-tab" label="页面" name="pages">
               <div ref="content" class="content">
@@ -182,7 +182,34 @@
               </div>
             </Tab-pane>
             <!-- tab 2 -->
-            <Tab-pane class="noprint component-tab" label="控件信息" name="widgets">
+            <Tab-pane :disabled="widgetsTabDisable" class="noprint component-tab" label="控件信息" name="widgets">
+              <Row>
+                <Col span="12">
+                  <Input class="component-position" v-model="selectedComponentX">
+                    <span slot="prepend" @click.stop="handleMinus('x', selectedComponentX)"><Icon type="minus" style="cursor:pointer"></Icon></span>
+                    <span slot="append" @click.stop="handlePlus('x', selectedComponentX)"><Icon type="plus" style="cursor:pointer"></Icon></span>
+                  </Input>
+                </Col>
+                <Col span="12">
+                  <Input class="component-position" v-model="selectedComponentY">
+                    <span slot="prepend" @click.stop="handleMinus('y', selectedComponentY)"><Icon type="minus"></Icon></span>
+                    <span slot="append" @click.stop="handlePlus('y', selectedComponentY)"><Icon type="plus"></Icon></span>
+                  </Input>
+                </Col>
+              </Row>
+              <Row>
+                <Col span="12" style="text-align: center">X</Col>
+                <Col span="12" style="text-align: center">Y</Col>
+              </Row>
+              <br>
+              <Row label="滑块">
+                <Col span="6" style="text-align: center">
+                  <div style="margin: 8px 1px">字体(磅):</div>
+                </Col>
+                <Col span="18" style="text-align: center">
+                  <Slider v-model="selectedComponentFontSize" :max="30"></Slider>
+                </Col>
+              </Row>
             </Tab-pane>
           </Tabs>
         </div>
@@ -265,13 +292,72 @@ export default {
       addPageLoading: 'pages/addPageLoading',
       addPageData: 'pages/addPageData',
       addPageError: 'pages/addPageError',
-      widgets: 'widgets/data'
+      widgets: 'widgets/data',
+      selected: 'components/selected'
     }),
     // 当前页
     currPage: function () {
       let currpage = this.pages.find(p => p.id === this.currPageId)
       if (currpage) return currpage
       else return null
+    },
+    tabName: function () {
+      if (this.selected.target) return 'widgets'
+      // else return 'pages'
+    },
+    widgetsTabDisable: function () {
+      return this.selected.target === null
+    },
+    selectedComponentX: {
+      get () {
+        if (this.selected.component) return parseInt(this.selected.component.left, 10)
+        else return ''
+      },
+      set (value) {
+        if (!this.selected.component) {
+          console.warn('component data error')
+          return
+        }
+        const el = {
+          ...this.selected.component,
+          left: value + 'px'
+        }
+        this.updateComponent({tplId: this.currTemplate, pageId: this.currPageId, component: el})
+      }
+    },
+    selectedComponentY: {
+      get () {
+        if (this.selected.component) return parseInt(this.selected.component.top, 10)
+        else return ''
+      },
+      set (value) {
+        if (!this.selected.component) {
+          console.warn('component data error')
+          return
+        }
+        const el = {
+          ...this.selected.component,
+          top: value + 'px'
+        }
+        this.updateComponent({tplId: this.currTemplate, pageId: this.currPageId, component: el})
+      }
+    },
+    selectedComponentFontSize: {
+      get () {
+        if (this.selected.component) return parseInt(this.selected.component.fontSize, 10)
+        else return 0
+      },
+      set (value) {
+        if (!this.selected.component) {
+          console.warn('component data error')
+          return
+        }
+        const el = {
+          ...this.selected.component,
+          fontSize: value + 'pt'
+        }
+        this.updateComponent({tplId: this.currTemplate, pageId: this.currPageId, component: el})
+      }
     },
     canvasHeight: function () {
       const {innerHeight} = window
@@ -291,13 +377,16 @@ export default {
   },
   methods: {
     ...mapActions({
-      'addPage': 'pages/addPage',
-      'switchPage': 'pages/switchPage',
-      'flushHistory': 'components/flushHistory',
-      'initHistory': 'components/initHistory',
-      'getWidgets': 'widgets/getAll'
+      addPage: 'pages/addPage',
+      switchPage: 'pages/switchPage',
+      flushHistory: 'components/flushHistory',
+      initHistory: 'components/initHistory',
+      getWidgets: 'widgets/getAll',
+      unselect: 'components/unselect',
+      updateComponent: 'components/updateComponent'
     }),
     handleSwitchPage: function (pageId) {
+      if (pageId === this.currPageId) return false
       this.switchPage(pageId)
       // this.flushHistory({pageId: this.page.id})
       this.initHistory({tplId: this.template.id, pageId: pageId})
@@ -313,6 +402,20 @@ export default {
           title: this.newPageTitle
         }
       })
+    },
+    handlePlus (axis) {
+      if (axis === 'x') {
+        this.selectedComponentX += 1
+      } else if (axis === 'y') {
+        this.selectedComponentY += 1
+      }
+    },
+    handleMinus (axis) {
+      if (axis === 'x') {
+        this.selectedComponentX -= 1
+      } else if (axis === 'y') {
+        this.selectedComponentY -= 1
+      }
     },
     scrollHanle (evt) {
       // console.log(evt)
@@ -344,6 +447,9 @@ export default {
         // scroll to center horizontal
         this.$refs.screen.$el.scrollLeft = (this.$refs.canvas.clientWidth - this.$refs.screen.$el.clientWidth) / 2
       })
+    },
+    handleClickOutside: function (e) {
+      if (e.which === 1) this.unselect() // 只针对左键
     }
   },
   watch: {
@@ -370,13 +476,21 @@ export default {
     WidgetContainer
   },
   created () {
-    console.log('created')
+    console.log('created==')
   },
   mounted () {
     this.initHistory({tplId: this.template.id, pageId: this.currPageId})
     this.reCalcPageSize()
     this.getWidgets(this.template.id)
     window.addEventListener('resize', this.handleResize)
+    // 注册全局点击事件
+    // window.addEventListener('mousedown', this.handleClickOutside)
+    this.$refs.canvas.addEventListener('mousedown', this.handleClickOutside, false)
+    // 注册方向键移动事件
+    // window.addEventListener('keydown', this.handleKeyDown)
+    // window.addEventListener('keyup', this.handleKeyUp)
+  },
+  beforeUpdate () {
   },
   beforeDestroy () {
     window.removeEventListener('resize', this.handleResize)

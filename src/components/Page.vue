@@ -1,19 +1,23 @@
 <style scoped>
-@media print{
-  @page {
-    size: A4 portrait;
-    margin: 0;
-    padding: 0;
-    border: 0;
+  @media print{
+    @page {
+      size: A4 portrait;
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+    .page {
+      padding: 0 !important;
+      margin: 0 !important;
+      box-shadow: none !important;
+      background: none;
+    }
+    .component {
+      background: none !important;
+    }
   }
   .page {
-    padding: 0 !important;
-    margin: 0 !important;
-    box-shadow: none !important;
-  }
-}
-  .page {
-    background: url('../assets/images/p1.png');
+    background: url('../assets/images/p3.jpg');
     display: block;
     margin: 0 auto;
     margin-bottom: 0.5cm;
@@ -31,17 +35,30 @@
   .component {
     position: absolute;
     border: 1px dashed #aaa;
-    padding: 5px 10px;
+    padding: 1px 5px;
     cursor: default;
     user-select: none;
-    font-size: 12pt;
+    font-size: 14pt;
+    background: rgba(91, 192, 222, 0.15);
+  }
+  .component.select {
+    background: rgba(222, 222, 91, 0.3);
+    border-color: #b5d2f1;
   }
 </style>
 <template>
   <div class="page" size="A4" v-droppable="{handleDrop: handleDrop}">
     <template v-if="currComponents.length > 0">
       <template v-for="component in currComponents">
-        <div v-if="scale !== 1" :id="component.id" v-moveable="{scale: scale, handleMove: handleMove}" class="component" draggable="false" :style="{left: component.left, top: component.top}">{{ widgetText(component.widgetId) }}</div>
+        <div
+          :id="component.id"
+          v-if="scale !== 1"
+          v-editable="{scale: scale, move: handleMove, select: handleSelect}"
+          class="component"
+          @keyup.up="handleMoveUp"
+          draggable="false" :style="{left: component.left, top: component.top, 'font-size': component.fontSize}">
+            {{ widgetText(component.widgetId) }}
+        </div>
       </template>
     </template>
     <Spin class="noprint" size="large" fix v-if="loading"></Spin>
@@ -73,7 +90,8 @@
       ...mapGetters({
         loading: 'components/loading',
         error: 'components/error',
-        components: 'components/data'
+        components: 'components/data',
+        selected: 'components/selected'
       }),
       currComponents: function () {
         let cs = this.components.find(t => t.pageId === this.page.id)
@@ -88,7 +106,8 @@
     methods: {
       ...mapActions({
         'addComponent': 'components/addComponent',
-        'updateComponent': 'components/updateComponent'
+        'updateComponent': 'components/updateComponent',
+        'select': 'components/select'
       }),
       widgetText: function (id) {
         let widget = this.widgets.find(t => t.id === id)
@@ -105,6 +124,20 @@
           return
         }
         this.updateComponent({tplId: this.tplid, pageId: this.page.id, component: el})
+      },
+      // 右键打开菜单
+      openMenu: function () {
+      },
+      // 选中
+      handleSelect: function (target) {
+        this.select({pageId: this.page.id, target: target})
+      },
+      // 取消选中
+      handleUnSelect: function () {
+        console.log('un select')
+      },
+      handleMoveUp: function (e) {
+        console.log(e)
       }
     },
     watch: {
@@ -114,7 +147,6 @@
       }
     },
     created () {
-      // this.getComponents({tplId: this.tplid, pageId: this.page.id})
     }
   }
 </script>

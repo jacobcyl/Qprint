@@ -75,6 +75,8 @@ export default {
     let currState = []
 
     let newComponent = {
+      fontSize: '14pt',
+      text: '',
       ...component,
       id: componentId,
       createdAt: time
