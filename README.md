@@ -1,6 +1,7 @@
 # print
 
 > A easy print assistant for you
+> 一个可以根据模板自定义位置来打印填充表格的工具
 
 ## Build Setup
 
